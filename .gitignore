@@ -1,0 +1,12 @@
+node_modules/
+dist/
+coverage/
+out/
+.env*
+!.env.example
+*.docx
+*.pdf
+!fixtures/**/*.docx
+!fixtures/**/*.pdf
+graphify-out/*
+!graphify-out/GRAPH_REPORT.md
