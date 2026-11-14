@@ -1,6 +1,8 @@
 # Attribution
 
-No code has been copied from another repository in this bootstrap. If code is copied later, record the source, copyright notice, applicable license, and the reused files here before merging.
+The `ats-classic` Word template is original to this repository. It names Noto Sans as its font but does not bundle font binaries. Environments rendering PDFs must provision Noto Sans, available from Google Fonts under the SIL Open Font License 1.1 (https://openfontlicense.org/open-font-license-official-text/). The generated fixture does not use personal CV data.
+
+The renderer uses the free core of docxtemplater and its PizZip integration. Third-party packages retain their own licenses in their distributions; no package source was copied into this repository.
 
 The following public sources are candidates for future reuse, not current dependencies:
 

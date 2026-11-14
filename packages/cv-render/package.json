@@ -1,0 +1,21 @@
+{
+  "name": "@jdcv/cv-render",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "template": "node scripts/create-template.mjs"
+  },
+  "dependencies": {
+    "docxtemplater": "^3.67.0",
+    "pdfjs-dist": "^4.10.38",
+    "pizzip": "^3.2.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "mammoth": "^1.9.0"
+  }
+}
