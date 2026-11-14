@@ -8,7 +8,11 @@ import {
 } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { isAbsolute, join, relative } from 'node:path';
-import { moduleV2Schema, type ModuleV2 } from '@jdcv/contracts';
+import {
+  moduleV2Schema,
+  type ModuleV2,
+  type QualityGateResult,
+} from '@jdcv/contracts';
 import type { Job, JobQueue } from '@jdcv/queue';
 
 export type Role = 'Generator' | 'Interviewer' | 'Examiner';
@@ -56,6 +60,7 @@ export interface WorkerOptions {
   runner: RelayRunner;
   prompts: PromptBuilder;
   load: LoadReader;
+  qualityGate?: { run(module: ModuleV2, job: Job): Promise<QualityGateResult> };
   ownerId: string;
   workspaceRoot?: string;
   repoRoot?: string;
@@ -289,8 +294,19 @@ export class MacWorker {
         covers(interview.covered, requirements) &&
         covers(interview.defended, embellishments) &&
         passesRubric(module, rubric)
-      )
+      ) {
+        if (this.options.qualityGate) {
+          const result = await this.options.qualityGate.run(module, job);
+          await writeFile(
+            paths.module,
+            JSON.stringify({ ...module, qualityGate: result }),
+            { mode: 0o600 },
+          );
+          if (!result.passed || result.failures.length)
+            throw new RubricFailure();
+        }
         return paths.module;
+      }
     }
     throw new RubricFailure();
   }

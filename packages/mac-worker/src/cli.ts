@@ -16,6 +16,10 @@ Set JDCV_OWNER_ID to the owner ID, JDCV_QUEUE_DIR to an absolute private queue
 directory, JDCV_JOB_DIR to an absolute private workspace directory, and
 JDCV_T3_REPO to a private local Git repository for live T3 threads.
 --dry-run uses a fake module and fake rubric; it never calls a model.
+Live CLI runs are disabled until a private qualityGate adapter supplies the
+facts, approvals, extracted text, and independent reviewer.
+Live CLI runs remain disabled until a private qualityGate adapter supplies
+CV facts, line approvals, extracted text, and an independent reviewer.
 --once handles one available job; without it the worker polls every 30 seconds,
 or every two minutes while Mac load is above 40.
 Input references must name private files. Only owner jobs on the mac route run.
@@ -106,6 +110,8 @@ async function main(): Promise<void> {
   const ownerId = process.env.JDCV_OWNER_ID;
   if (!ownerId) throw new Error('Set JDCV_OWNER_ID');
   const dry = process.argv.includes('--dry-run');
+  if (!dry) throw new Error('Live CLI requires a private qualityGate adapter');
+  if (!dry) throw new Error('Live CLI requires a private qualityGate adapter');
   const privateRepo = process.env.JDCV_T3_REPO;
   if (!dry && !privateRepo) throw new Error('Set JDCV_T3_REPO for live runs');
   const load = new SysctlLoad();

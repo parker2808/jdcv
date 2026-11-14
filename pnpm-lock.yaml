@@ -65,6 +65,27 @@ importers:
         specifier: ^1.9.0
         version: 1.13.0
 
+  packages/gates:
+    dependencies:
+      '@jdcv/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@jdcv/cv-render':
+        specifier: workspace:*
+        version: link:../cv-render
+      '@jdcv/prompts':
+        specifier: workspace:*
+        version: link:../prompts
+
+  packages/kb-autofill:
+    dependencies:
+      '@jdcv/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@jdcv/gates':
+        specifier: workspace:*
+        version: link:../gates
+
   packages/mac-worker:
     dependencies:
       '@jdcv/contracts':

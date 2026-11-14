@@ -124,6 +124,26 @@
         ],
         "additionalProperties": false
       }
+    },
+    "qualityGate": {
+      "type": "object",
+      "properties": {
+        "passed": { "type": "boolean" },
+        "failures": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "field": { "type": "string" },
+              "reason": { "type": "string" }
+            },
+            "required": ["field", "reason"],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": ["passed", "failures"],
+      "additionalProperties": false
     }
   },
   "required": ["version", "requirements", "entries"],
