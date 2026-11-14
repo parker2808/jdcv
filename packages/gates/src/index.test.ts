@@ -79,7 +79,7 @@ function changedLine(input: GateInput): void {
       id: 'change-1',
       path: 'experience.0.projects.0.bullets.0',
       before: 'Original wording',
-      after: 'Improved wording',
+      after: cv.experience[0]!.projects[0]!.bullets[0]!.text.en,
       reason: 'Fulfills a role requirement',
       risk: 'low',
       requirementId: 'req-frontend',
@@ -203,6 +203,19 @@ describe('quality gates', () => {
       'private name',
       (input: GateInput) => {
         input.publicText = 'internal-repository';
+      },
+    ],
+    [
+      'AI mention',
+      (input: GateInput) => {
+        input.publicText = 'AI-assisted writing';
+      },
+    ],
+    [
+      'approved wording differs from exported line',
+      (input: GateInput) => {
+        changedLine(input);
+        input.changes![0]!.after = 'Different approved text';
       },
     ],
     [

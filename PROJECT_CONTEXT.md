@@ -20,7 +20,7 @@ The production data service and its configuration are not available yet. `JobQue
 
 ## Changelog
 
-- 2026-11-15: Added an injectable CV/module quality gate with fictional blocking cases and a recorded worker result. Production private fact and reviewer adapters remain external to this repository.
+- 2026-11-15: Added an injectable CV/module quality gate with fictional blocking cases and a recorded worker result. The CLI refuses live runs until production private fact and reviewer adapters exist; the fake dry run still works.
 
 - 2026-11-15: Added an owner-only Mac worker with injectable T3 relay, load admission, shared gate lock, and fake end-to-end tests. The prompt package is not wired to the worker yet because its separate private files and independent readability gate require a contract migration.
 - 2026-11-15: Added bounded thread prompts, interview and readability gates, and owner/outside-user proposal policy with fictional tests.

@@ -167,16 +167,23 @@ export async function runGates(input: GateInput): Promise<QualityGateResult> {
           fail(`${field}.defenseEntryId`, 'Defense entry must be unique');
         defenseIds.add(decision.defenseEntryId);
       }
-      if (
-        !cv.experience.some((role) =>
-          role.projects.some((project) =>
-            project.bullets.some(
-              (bullet) => bullet.embellishmentId === change.id,
-            ),
+      const referencedLines = cv.experience.flatMap((role) =>
+        role.projects.flatMap((project) =>
+          project.bullets.filter(
+            (bullet) => bullet.embellishmentId === change.id,
           ),
-        )
-      )
+        ),
+      );
+      if (referencedLines.length !== 1)
         fail(`${field}.id`, 'Change must reference exactly one CV line');
+      if (
+        referencedLines.length === 1 &&
+        !Object.values(referencedLines[0]!.text).includes(change.after)
+      )
+        fail(
+          `${field}.after`,
+          'Approved wording must match the exported CV line',
+        );
     }
     for (const [index, role] of cv.experience.entries())
       for (const [projectIndex, project] of role.projects.entries())
@@ -321,6 +328,8 @@ export async function runGates(input: GateInput): Promise<QualityGateResult> {
       : []),
   ].join('\n');
   if (/\u2014/u.test(text)) fail('publicText', 'Em dash is not allowed');
+  if (input.rules && /\b(?:AI|artificial intelligence)\b/iu.test(text))
+    fail('publicText', 'Owner CV policy forbids AI mentions');
   if (
     /\b(?:[\w.+-]+@[\w.-]+\.[a-z]{2,}|(?:\+?\d[\d .()-]{8,}\d)|(?:sk-[A-Za-z0-9_-]{16,}|gh[opusr]_[A-Za-z0-9_]{20,}|AKIA[0-9A-Z]{16}))\b/iu.test(
       text,
