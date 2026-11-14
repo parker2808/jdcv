@@ -4,7 +4,7 @@ JDCV Prep helps turn a job description into a tailored CV and interview study pa
 
 ## Current state
 
-The repository is pre-alpha and contains only a workspace starter. Phase 1 is owner-only: the web view shows results and links to a Telegram conversation. No production service, personal CV, account integration, or deployment exists in this repository yet.
+The repository is pre-alpha and contains a workspace starter and a local file job queue. Phase 1 is owner-only: the planned web view shows results and links to a Telegram conversation. No production service, personal CV, account integration, worker, or deployment exists in this repository yet.
 
 ## Planned phases
 
@@ -16,8 +16,9 @@ The starter uses Node.js 22, pnpm 9, TypeScript, Vitest, ESLint, and Prettier. T
 
 ## Open facts
 
-The production data service and its configuration are not available yet. Later specifications will define storage, worker, and export interfaces before implementation. Licensing and exact attribution for any future reused code must be checked before copying.
+The production data service and its configuration are not available yet. `JobQueue` defines the storage contract; the database adapter, worker process, and export flow remain later tasks. The file queue assumes atomic rename on one local volume and a single Mac host; confirm cross-volume behavior before changing its storage location. Licensing and exact attribution for any future reused code must be checked before copying.
 
 ## Changelog
 
+- 2026-11-15: Added the Phase 1 local file queue with leased claims, retry limits, and a reusable storage interface.
 - 2026-11-15: Created the public workspace baseline and local/CI gates; implementation remains pre-alpha.
