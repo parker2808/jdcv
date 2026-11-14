@@ -16,7 +16,8 @@ Set JDCV_OWNER_ID to the owner ID, JDCV_QUEUE_DIR to an absolute private queue
 directory, JDCV_JOB_DIR to an absolute private workspace directory, and
 JDCV_T3_REPO to a private local Git repository for live T3 threads.
 --dry-run uses a fake module and fake rubric; it never calls a model.
---once handles one available job; without it the worker polls every 30 seconds.
+--once handles one available job; without it the worker polls every 30 seconds,
+or every two minutes while Mac load is above 40.
 Input references must name private files. Only owner jobs on the mac route run.
 For example, enqueue a fake Alex Example JD with maxAttempts: 1, then use
 --dry-run --once to exercise the queue without starting T3 threads.`;
@@ -107,17 +108,23 @@ async function main(): Promise<void> {
   const dry = process.argv.includes('--dry-run');
   const privateRepo = process.env.JDCV_T3_REPO;
   if (!dry && !privateRepo) throw new Error('Set JDCV_T3_REPO for live runs');
+  const load = new SysctlLoad();
   const worker = new MacWorker({
     queue: new FileJobQueue(),
     runner: dry ? new DryRunner() : new T3Relay(privateRepo!),
     prompts,
-    load: new SysctlLoad(),
+    load,
     ownerId,
     workspaceRoot: process.env.JDCV_JOB_DIR,
     repoRoot: fileURLToPath(new URL('../../../', import.meta.url)),
     log: (event) => console.log(JSON.stringify(event)),
   });
   for (;;) {
+    if ((await load.read()) > 40) {
+      if (process.argv.includes('--once')) break;
+      await new Promise((done) => setTimeout(done, 120_000));
+      continue;
+    }
     await worker.cleanup();
     const job = await worker.runOnce();
     if (job) console.log(`Job ${job.id}: ${job.status}`);
