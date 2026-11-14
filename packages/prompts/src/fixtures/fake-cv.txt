@@ -1,0 +1,1 @@
+Alex Example worked on the fictional-project interface between 2020 and 2022. The project used TypeScript, and Alex wrote basic interface tests. This is a synthetic curriculum vitae for tests, not a real person's career history.

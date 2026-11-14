@@ -1,0 +1,1 @@
+Fictional Studio seeks a frontend developer for a practice exercise. The role requires TypeScript interface work and automated tests. Both requirements are mandatory. This is a synthetic job description, not a real vacancy.
