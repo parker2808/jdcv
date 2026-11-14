@@ -9,10 +9,10 @@
   "scripts": {
     "format:check": "prettier --check .",
     "lint": "eslint .",
-    "typecheck": "tsc -p packages/shared/tsconfig.json --noEmit && tsc -p packages/queue/tsconfig.json --noEmit && tsc -p packages/contracts/tsconfig.json --noEmit && tsc -p packages/cv-render/tsconfig.json --noEmit && pnpm --filter @jdcv/contracts build && tsc -p packages/prompts/tsconfig.json --noEmit",
+    "typecheck": "pnpm --filter @jdcv/queue --filter @jdcv/contracts build && tsc -p packages/shared/tsconfig.json --noEmit && tsc -p packages/queue/tsconfig.json --noEmit && tsc -p packages/contracts/tsconfig.json --noEmit && tsc -p packages/cv-render/tsconfig.json --noEmit && tsc -p packages/prompts/tsconfig.json --noEmit && tsc -p packages/mac-worker/tsconfig.json --noEmit",
     "schema:check": "pnpm --filter @jdcv/contracts schema:check",
     "test": "vitest run",
-    "build": "pnpm --filter @jdcv/shared build && pnpm --filter @jdcv/queue build && pnpm --filter @jdcv/contracts build && pnpm --filter @jdcv/cv-render build && pnpm --filter @jdcv/prompts build",
+    "build": "pnpm --filter @jdcv/shared build && pnpm --filter @jdcv/queue build && pnpm --filter @jdcv/contracts build && pnpm --filter @jdcv/cv-render build && pnpm --filter @jdcv/prompts build && pnpm --filter @jdcv/mac-worker build",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm schema:check && pnpm test && pnpm build"
   },
   "devDependencies": {
