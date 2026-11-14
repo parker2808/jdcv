@@ -1,0 +1,23 @@
+repos:
+  - repo: local
+    hooks:
+      - id: gitleaks-staged
+        name: Scan staged changes for secrets
+        entry: gitleaks git --staged --redact --no-banner --log-level error
+        language: system
+        pass_filenames: false
+      - id: whitespace-staged
+        name: Check staged whitespace
+        entry: git diff --cached --check
+        language: system
+        pass_filenames: false
+      - id: eof-staged
+        name: Check staged files end in a newline
+        entry: python3 scripts/check-staged-eof.py
+        language: system
+        pass_filenames: false
+      - id: large-files-staged
+        name: Reject oversized staged files
+        entry: python3 scripts/check-staged-size.py
+        language: system
+        pass_filenames: false
