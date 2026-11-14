@@ -18,6 +18,6 @@ scripts/check.sh
 
 ## Repository layout
 
-`packages/shared` contains a small TypeScript starter package and its test. Future application packages go in `apps/` and reusable packages in `packages/`. `docs/README.md` indexes documentation; future design specifications go in `docs/specs/`. `PROJECT_CONTEXT.md` records the current scope and unanswered questions, and `AGENTS.md` explains contributor rules.
+`packages/shared` contains a small TypeScript starter package and its test. Future application packages go in `apps/` and reusable packages in `packages/`. `docs/README.md` indexes documentation. The [system specifications](docs/specs/README.md) describe the planned data contracts, worker, CV workflow, user experience, and privacy safeguards before implementation. `PROJECT_CONTEXT.md` records the current scope and unanswered questions, and `AGENTS.md` explains contributor rules.
 
 Only fake sample data belongs in this public repository. Do not add real CVs, contact details, credentials, or private source code.
