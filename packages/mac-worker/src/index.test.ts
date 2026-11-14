@@ -153,6 +153,58 @@ describe('MacWorker', () => {
     expect(stages.filter((item) => item.startsWith('start:'))).toHaveLength(3);
   });
 
+  it('records a failed quality result and blocks completion', async () => {
+    const job = await queue.enqueue(jobInput(input));
+    const guarded = new MacWorker({
+      queue,
+      runner: runner(),
+      prompts,
+      ownerId: 'owner',
+      load: { read: async () => 24 },
+      workspaceRoot: join(root, 'jobs'),
+      repoRoot: process.cwd(),
+      qualityGate: {
+        run: async () => ({
+          passed: false,
+          failures: [{ field: 'module.entries.0', reason: 'Needs review' }],
+        }),
+      },
+    });
+    expect((await guarded.runOnce())?.status).toBe('failed');
+    const saved = JSON.parse(
+      await readFile(join(root, 'jobs', job.id, 'module.json'), 'utf8'),
+    );
+    expect(saved.qualityGate.failures).toEqual([
+      { field: 'module.entries.0', reason: 'Needs review' },
+    ]);
+  });
+
+  it('records an injected quality result and blocks completion on failure', async () => {
+    const job = await queue.enqueue(jobInput(input));
+    const guarded = new MacWorker({
+      queue,
+      runner: runner(),
+      prompts,
+      ownerId: 'owner',
+      load: { read: async () => 24 },
+      workspaceRoot: join(root, 'jobs'),
+      repoRoot: process.cwd(),
+      qualityGate: {
+        run: async () => ({
+          passed: false,
+          failures: [{ field: 'module.entries.0', reason: 'Needs review' }],
+        }),
+      },
+    });
+    expect((await guarded.runOnce())?.status).toBe('failed');
+    const saved = JSON.parse(
+      await readFile(join(root, 'jobs', job.id, 'module.json'), 'utf8'),
+    );
+    expect(saved.qualityGate.failures).toEqual([
+      { field: 'module.entries.0', reason: 'Needs review' },
+    ]);
+  });
+
   it.each([24, 25, 40, 41])(
     'admits new work only below 25 at load %i',
     async (value) => {

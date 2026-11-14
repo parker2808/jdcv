@@ -38,6 +38,12 @@ export const embellishmentRefSchema = z.strictObject({
   defenseEntryId: identifier,
 });
 
+export const qualityGateResultSchema = z.strictObject({
+  passed: z.boolean(),
+  failures: z.array(z.strictObject({ field: z.string(), reason: z.string() })),
+});
+export type QualityGateResult = z.infer<typeof qualityGateResultSchema>;
+
 function checkLinks(
   module: {
     requirements: { id: string }[];
@@ -117,6 +123,7 @@ export const moduleV2Schema = z
         embellishmentRefs: z.array(embellishmentRefSchema).optional(),
       }),
     ),
+    qualityGate: qualityGateResultSchema.optional(),
   })
   .superRefine(checkLinks);
 

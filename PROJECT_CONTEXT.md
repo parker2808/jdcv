@@ -4,7 +4,7 @@ JDCV Prep helps turn a job description into a tailored CV and interview study pa
 
 ## Current state
 
-The repository is pre-alpha and contains a workspace starter, a local file job queue, shared module contracts, a standalone CV renderer with a fictional sample template, pure prompt templates, and a Mac worker with a fake-model dry run. Phase 1 is owner-only: the planned web view will show results and link to a Telegram conversation. No production service, personal CV, account integration, or deployment exists in this repository yet.
+The repository is pre-alpha and contains a workspace starter, a local file job queue, shared module contracts, a standalone CV renderer with a fictional sample template, pure prompt templates, quality gates, and a Mac worker with a fake-model dry run. Phase 1 is owner-only: the planned web view will show results and link to a Telegram conversation. No production service, personal CV, account integration, or deployment exists in this repository yet.
 
 ## Planned phases
 
@@ -19,6 +19,8 @@ The starter uses Node.js 22, pnpm 9, TypeScript, Vitest, ESLint, and Prettier. T
 The production data service and its configuration are not available yet. `JobQueue` defines the storage contract; the database adapter and connected export flow remain later tasks. The Mac worker has not been launched as a service, and a live private runner still needs an operational review. The prompt package expects separate private JD, CV, facts, proposals, transcript, and readability files; the worker currently accepts one input reference and uses an injected prompt builder, so connecting the two requires a separate output and gate migration. The worker must still verify project facts and require per-line CV approval before export. The file queue assumes atomic rename on one local volume and a single Mac host; confirm cross-volume behavior before changing its storage location. The version 2 specification leaves archive dates and job-description IDs for the later storage record, not the module document. A knowledge-base (KB) reference cannot become live until its external target is verified. A trusted caller must obtain approvals from protected storage before rendering. The separate HTML/Chromium fallback, authenticated downloads with 30-day expiry, deployment font provisioning, and free-tier Gotenberg memory measurement remain open; the renderer fails visibly without a verified fallback. Licensing and exact attribution for any future reused code must be checked before copying.
 
 ## Changelog
+
+- 2026-11-15: Added an injectable CV/module quality gate with fictional blocking cases and a recorded worker result. Production private fact and reviewer adapters remain external to this repository.
 
 - 2026-11-15: Added an owner-only Mac worker with injectable T3 relay, load admission, shared gate lock, and fake end-to-end tests. The prompt package is not wired to the worker yet because its separate private files and independent readability gate require a contract migration.
 - 2026-11-15: Added bounded thread prompts, interview and readability gates, and owner/outside-user proposal policy with fictional tests.
