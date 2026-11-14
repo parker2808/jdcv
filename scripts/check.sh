@@ -13,6 +13,7 @@ fi
 pnpm format:check
 pnpm lint
 pnpm typecheck
+pnpm schema:check
 pnpm test
 pnpm build
 git diff --check

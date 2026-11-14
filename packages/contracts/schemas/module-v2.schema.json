@@ -1,0 +1,132 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "version": { "type": "number", "const": 2 },
+    "requirements": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "title": {
+            "type": "object",
+            "properties": {
+              "en": { "type": "string", "minLength": 1, "pattern": "\\S" },
+              "vi": { "type": "string", "minLength": 1, "pattern": "\\S" }
+            },
+            "required": ["en", "vi"],
+            "additionalProperties": false
+          }
+        },
+        "required": ["id", "title"],
+        "additionalProperties": false
+      }
+    },
+    "entries": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": { "type": "string", "minLength": 1 },
+          "section": {
+            "type": "string",
+            "enum": [
+              "jd",
+              "concepts",
+              "interview",
+              "pitch",
+              "rescue",
+              "ask",
+              "cheat"
+            ]
+          },
+          "jdRequirement": { "type": "string" },
+          "tags": { "type": "array", "items": { "type": "string" } },
+          "title": {
+            "type": "object",
+            "properties": {
+              "en": { "type": "string", "minLength": 1, "pattern": "\\S" },
+              "vi": { "type": "string", "minLength": 1, "pattern": "\\S" }
+            },
+            "required": ["en", "vi"],
+            "additionalProperties": false
+          },
+          "shortAnswer": {
+            "type": "object",
+            "properties": {
+              "en": { "type": "string", "minLength": 1, "pattern": "\\S" },
+              "vi": { "type": "string", "minLength": 1, "pattern": "\\S" }
+            },
+            "required": ["en", "vi"],
+            "additionalProperties": false
+          },
+          "keyPoints": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "en": { "type": "string", "minLength": 1, "pattern": "\\S" },
+                "vi": { "type": "string", "minLength": 1, "pattern": "\\S" }
+              },
+              "required": ["en", "vi"],
+              "additionalProperties": false
+            }
+          },
+          "detail": {
+            "type": "object",
+            "properties": {
+              "en": { "type": "string", "minLength": 1, "pattern": "\\S" },
+              "vi": { "type": "string", "minLength": 1, "pattern": "\\S" }
+            },
+            "required": ["en", "vi"],
+            "additionalProperties": false
+          },
+          "kbRefs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "slug": { "type": "string", "minLength": 1 },
+                "sectionId": { "type": "string", "minLength": 1 },
+                "state": {
+                  "type": "string",
+                  "enum": ["pending", "live", "rejected"]
+                }
+              },
+              "required": ["slug", "sectionId", "state"],
+              "additionalProperties": false
+            }
+          },
+          "embellishmentRefs": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": { "type": "string", "minLength": 1 },
+                "status": { "type": "string", "enum": ["pending", "approved"] },
+                "defenseEntryId": { "type": "string", "minLength": 1 }
+              },
+              "required": ["id", "status", "defenseEntryId"],
+              "additionalProperties": false
+            }
+          }
+        },
+        "required": [
+          "id",
+          "section",
+          "jdRequirement",
+          "tags",
+          "title",
+          "shortAnswer",
+          "keyPoints",
+          "detail"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["version", "requirements", "entries"],
+  "additionalProperties": false,
+  "x-jdcv-integrity": "module"
+}
