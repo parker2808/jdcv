@@ -10,15 +10,16 @@ Install Node.js 22 (see `.nvmrc`) and pnpm 9, then run these commands from the r
 
 ```sh
 pnpm install
+pnpm --filter @jdcv/contracts schema:generate
 pnpm check
 scripts/check.sh
 ```
 
-`pnpm check` runs formatting, lint, type checking, unit tests, and a build. `scripts/check.sh` runs the local pull-request gate, including a secrets scan when gitleaks is installed and a whitespace check. For example, run the script before opening a pull request for a new parser, even if its unit tests pass.
+`pnpm check` runs formatting, lint, type checking, a generated JSON Schema freshness check, unit tests, and a build. Generate schemas only after changing the contract. `scripts/check.sh` runs the local pull-request gate, including a secrets scan when gitleaks is installed and a whitespace check. For example, run the script before opening a pull request for a new parser, even if its unit tests pass.
 
 ## Repository layout
 
-`packages/shared` contains a small TypeScript starter package and its test. `packages/queue` contains the Phase 1 local file queue and a storage-independent `JobQueue` interface. Future application packages go in `apps/` and reusable packages in `packages/`. `docs/README.md` indexes documentation. The [system specifications](docs/specs/README.md) describe the planned data contracts, worker, CV workflow, user experience, and privacy safeguards before implementation. `PROJECT_CONTEXT.md` records the current scope and unanswered questions, and `AGENTS.md` explains contributor rules.
+`packages/shared` contains a small TypeScript starter package and its test. `packages/queue` contains the Phase 1 local file queue and a storage-independent `JobQueue` interface. [`packages/contracts`](packages/contracts/README.md) provides the versioned bilingual module validators, version 1 converter, fixtures, and JSON Schema for workers that do not use TypeScript. Future application packages go in `apps/` and reusable packages in `packages/`. `docs/README.md` indexes documentation. The [system specifications](docs/specs/README.md) describe the planned data contracts, worker, CV workflow, user experience, and privacy safeguards before implementation. `PROJECT_CONTEXT.md` records the current scope and unanswered questions, and `AGENTS.md` explains contributor rules.
 
 ## Local job queue usage
 

@@ -1,0 +1,38 @@
+{
+  "version": 1,
+  "requirements": [
+    {
+      "id": "req-frontend",
+      "title": {
+        "en": "Explain a frontend decision",
+        "vi": "Giải thích một quyết định về frontend"
+      }
+    }
+  ],
+  "entries": [
+    {
+      "id": "q-frontend",
+      "section": "interview",
+      "jdRequirement": "req-frontend",
+      "tags": ["frontend"],
+      "title": {
+        "en": "How do you choose a layout?",
+        "vi": "Bạn chọn bố cục như thế nào?"
+      },
+      "shortAnswer": {
+        "en": "I start with the smallest screen and test the layout.",
+        "vi": "Tôi bắt đầu từ màn hình nhỏ nhất rồi kiểm tra bố cục."
+      },
+      "keyPoints": [
+        {
+          "en": "Check keyboard navigation.",
+          "vi": "Kiểm tra thao tác bằng bàn phím."
+        }
+      ],
+      "detail": {
+        "en": "For example, a sample form should stay usable at a narrow width.",
+        "vi": "Ví dụ, một biểu mẫu mẫu cần dùng được trên màn hình hẹp."
+      }
+    }
+  ]
+}

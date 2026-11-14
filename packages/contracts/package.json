@@ -1,0 +1,33 @@
+{
+  "name": "@jdcv/contracts",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./schemas/v1": "./schemas/module-v1.schema.json",
+    "./schemas/v2": "./schemas/module-v2.schema.json",
+    "./schemas/index": "./schemas/module-index.schema.json"
+  },
+  "files": [
+    "dist",
+    "schemas"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "schema:generate": "tsx scripts/generate-schemas.ts",
+    "schema:check": "tsx scripts/generate-schemas.ts --check"
+  },
+  "dependencies": {
+    "zod": "^4.1.0"
+  },
+  "devDependencies": {
+    "ajv": "^8.17.1",
+    "prettier": "^3.5.3"
+  }
+}
