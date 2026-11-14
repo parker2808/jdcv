@@ -77,6 +77,15 @@ importers:
         specifier: workspace:*
         version: link:../prompts
 
+  packages/kb-autofill:
+    dependencies:
+      '@jdcv/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@jdcv/gates':
+        specifier: workspace:*
+        version: link:../gates
+
   packages/mac-worker:
     dependencies:
       '@jdcv/contracts':
