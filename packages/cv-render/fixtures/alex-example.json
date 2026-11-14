@@ -1,0 +1,48 @@
+{
+  "basics": {
+    "name": "Alex Example",
+    "headline": "Frontend Engineer",
+    "location": "Sample City",
+    "contact": "contact available on request"
+  },
+  "summary": {
+    "en": "Builds accessible interfaces for fictional products.",
+    "vi": "Xây dựng giao diện dễ sử dụng cho các sản phẩm giả định."
+  },
+  "experience": [
+    {
+      "companyAlias": "Company A",
+      "confidential": true,
+      "title": "Frontend Engineer",
+      "start": "2023-01",
+      "end": null,
+      "projects": [
+        {
+          "alias": "Project X",
+          "stack": ["TypeScript", "Vue"],
+          "bullets": [
+            {
+              "text": {
+                "en": "Improved keyboard navigation on a sample dashboard.",
+                "vi": "Cải thiện thao tác bằng bàn phím trên bảng điều khiển mẫu."
+              },
+              "factRef": "fixture#project-x-1",
+              "embellishmentId": null
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "skills": [{ "group": "Frontend", "items": ["TypeScript", "Accessibility"] }],
+  "education": [
+    {
+      "institution": "Example Institute",
+      "qualification": "Sample Degree",
+      "year": "2022"
+    }
+  ],
+  "locale": "en",
+  "templateId": "ats-classic",
+  "jdId": "fictional-jd"
+}

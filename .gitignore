@@ -8,5 +8,6 @@ out/
 *.pdf
 !fixtures/**/*.docx
 !fixtures/**/*.pdf
+!packages/cv-render/templates/*.docx
 graphify-out/*
 !graphify-out/GRAPH_REPORT.md
