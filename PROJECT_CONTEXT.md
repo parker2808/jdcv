@@ -20,6 +20,7 @@ The production data service and its configuration are not available yet. `JobQue
 
 ## Changelog
 
+- 2026-11-15: Added injected knowledge-base topic matching, a duplicate-safe locked PR plan, public-content checks, and verified link transitions. A real content client and shared-lock adapter must be supplied outside this public repository; no content PR or development notice is sent here.
 - 2026-11-15: Added an injectable CV/module quality gate with fictional blocking cases and a recorded worker result. The CLI refuses live runs until production private fact and reviewer adapters exist; the fake dry run still works.
 
 - 2026-11-15: Added an owner-only Mac worker with injectable T3 relay, load admission, shared gate lock, and fake end-to-end tests. The prompt package is not wired to the worker yet because its separate private files and independent readability gate require a contract migration.
