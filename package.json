@@ -9,9 +9,9 @@
   "scripts": {
     "format:check": "prettier --check .",
     "lint": "eslint .",
-    "typecheck": "tsc -p packages/shared/tsconfig.json --noEmit",
+    "typecheck": "tsc -p packages/shared/tsconfig.json --noEmit && tsc -p packages/queue/tsconfig.json --noEmit",
     "test": "vitest run",
-    "build": "pnpm --filter @jdcv/shared build",
+    "build": "pnpm --filter @jdcv/shared build && pnpm --filter @jdcv/queue build",
     "check": "pnpm format:check && pnpm lint && pnpm typecheck && pnpm test && pnpm build"
   },
   "devDependencies": {

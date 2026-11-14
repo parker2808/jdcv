@@ -18,6 +18,12 @@ scripts/check.sh
 
 ## Repository layout
 
-`packages/shared` contains a small TypeScript starter package and its test. Future application packages go in `apps/` and reusable packages in `packages/`. `docs/README.md` indexes documentation; future design specifications go in `docs/specs/`. `PROJECT_CONTEXT.md` records the current scope and unanswered questions, and `AGENTS.md` explains contributor rules.
+`packages/shared` contains a small TypeScript starter package and its test. `packages/queue` contains the Phase 1 local file queue and a storage-independent `JobQueue` interface. Future application packages go in `apps/` and reusable packages in `packages/`. `docs/README.md` indexes documentation and `docs/specs/` contains implementation plans. `PROJECT_CONTEXT.md` records the current scope and unanswered questions, and `AGENTS.md` explains contributor rules.
+
+## Local job queue usage
+
+The queue stores job metadata on the Mac, not in this repository. By default it uses `~/.jdcv/queue`; set `JDCV_QUEUE_DIR` to an absolute private directory or pass `{ directory }` to `new FileJobQueue(...)` to change it. For example, a local worker can use a protected directory for a fictional job's input reference while keeping the document itself elsewhere.
+
+Call `enqueue` with a stage (`type`), owner ID, `mac` or `cloud` route, and a private `payload.inputRef` pointer. Pass a stable `idempotencyKey` for intake retries. A worker calls `claim(route, leaseMs)`, keeps the returned `leaseToken`, calls `heartbeat` before its lease expires, then calls `complete` with an output pointer or `fail` with an error. `get`, `list`, and `cancel` support status views. Only pass opaque pointers, not document text, as `inputRef` or `outputRef`; do not put personal information in error strings. The default is one attempt plus two retries with increasing delay; jobs expire after 45 minutes. The Mac worker and database adapter are not implemented yet.
 
 Only fake sample data belongs in this public repository. Do not add real CVs, contact details, credentials, or private source code.
