@@ -65,6 +65,12 @@ importers:
         specifier: ^1.9.0
         version: 1.13.0
 
+  packages/prompts:
+    dependencies:
+      '@jdcv/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+
   packages/queue: {}
 
   packages/shared: {}
