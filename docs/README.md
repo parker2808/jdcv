@@ -4,6 +4,8 @@ Start with the [project context](../PROJECT_CONTEXT.md) for the current product 
 
 The [file queue implementation plan](specs/file-job-queue.md) adds measurable race and retry checks for the first local adapter.
 
+The [Phase 1 end-to-end dry-run gap report](e2e-dryrun-gap-report.md) explains why a fictional bot-to-worker job is not yet a safe, complete CV delivery. For example, the worker's module JSON cannot be sent as an approved CV.
+
 The specifications cover:
 
 - [JD module schema v2](specs/module-schema-v2.md), including compatibility with existing bilingual study packs.
