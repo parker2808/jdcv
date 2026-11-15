@@ -14,6 +14,7 @@ import {
   type QualityGateResult,
 } from '@jdcv/contracts';
 import type { Job, JobQueue } from '@jdcv/queue';
+import { createCvProposal, PrivateCvError } from './cv-proposal.js';
 
 export type Role = 'Generator' | 'Interviewer' | 'Examiner';
 export interface Thread {
@@ -61,6 +62,8 @@ export interface WorkerOptions {
   prompts: PromptBuilder;
   load: LoadReader;
   qualityGate?: { run(module: ModuleV2, job: Job): Promise<QualityGateResult> };
+  moduleOnlyDryRun?: boolean;
+  privateCvDirectory?: string;
   ownerId: string;
   workspaceRoot?: string;
   repoRoot?: string;
@@ -171,9 +174,11 @@ export class MacWorker {
     } catch (error) {
       const message = controller.signal.aborted
         ? 'Job timed out'
-        : error instanceof RubricFailure
-          ? 'Quality gate failed'
-          : 'Worker execution failed';
+        : error instanceof PrivateCvError
+          ? error.code
+          : error instanceof RubricFailure
+            ? 'Quality gate failed'
+            : 'Worker execution failed';
       return this.options.queue.fail(job.id, job.leaseToken!, message);
     } finally {
       clearTimeout(deadline);
@@ -224,6 +229,54 @@ export class MacWorker {
       interview: join(workspace, 'interview.json'),
       rubric: join(workspace, 'rubric.json'),
     };
+    if (!this.options.moduleOnlyDryRun) {
+      const proposal = await createCvProposal({
+        directory:
+          this.options.privateCvDirectory ?? process.env.JDCV_PRIVATE_CV_DIR,
+        repoRoot: repo,
+        jdPath: input,
+        workspace,
+        cvVersionId: job.id,
+        signal,
+        relay: async (instructions, output, relaySignal) => {
+          const promptFile = join(workspace, 'cv-generator-start.md');
+          await writeFile(
+            promptFile,
+            'Prepare an owner CV proposal. Await instructions by relay.',
+            { mode: 0o600 },
+          );
+          const thread = await this.options.runner.start(
+            'Generator',
+            promptFile,
+            workspace,
+            relaySignal,
+          );
+          if (!(await this.admission(true, false, relaySignal)))
+            throw new Error('Mac load prevents a CV turn');
+          await this.options.runner.send(thread, instructions, relaySignal);
+          const observed = await this.options.runner.show(thread, relaySignal);
+          if (observed.id !== thread.id)
+            throw new Error('Thread identity changed');
+          this.options.log?.({
+            env: 't3-lil.parker',
+            jobId: job.id,
+            role: 'Generator',
+            threadId: observed.id,
+            provider: observed.provider,
+            model: observed.model,
+            switch:
+              observed.provider !== thread.provider ||
+              observed.model !== thread.model,
+          });
+          await realpath(output);
+        },
+      });
+      await writeFile(
+        join(workspace, 'cv-proposal.json'),
+        JSON.stringify(proposal),
+        { mode: 0o600 },
+      );
+    }
     const threads = new Map<Role, Thread>();
     const roles: Role[] = ['Generator', 'Interviewer', 'Examiner'];
     for (let revision = 0; revision <= 2; revision++) {
@@ -305,7 +358,9 @@ export class MacWorker {
           if (!result.passed || result.failures.length)
             throw new RubricFailure();
         }
-        return paths.module;
+        return this.options.moduleOnlyDryRun
+          ? paths.module
+          : join(workspace, 'cv-proposal.json');
       }
     }
     throw new RubricFailure();

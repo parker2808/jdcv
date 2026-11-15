@@ -11,6 +11,11 @@
   },
   "dependencies": {
     "@jdcv/contracts": "workspace:*",
-    "@jdcv/queue": "workspace:*"
+    "@jdcv/queue": "workspace:*",
+    "@jdcv/prompts": "workspace:*",
+    "@jdcv/gates": "workspace:*",
+    "@jdcv/cv-render": "workspace:*",
+    "mammoth": "^1.9.0",
+    "zod": "^3.24.0"
   }
 }

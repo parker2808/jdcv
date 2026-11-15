@@ -29,4 +29,6 @@ Plausibility is not proof. A user can approve an unsupported claim; the interfac
 
 ## Open questions
 
+The owner-only worker now stores a version 1 private proposal with pending decisions and an exact source-paragraph citation. It does not replace the later web or bot decision interface: for example, accepting one Example Labs line does not accept any sibling line. The export helper requires a passing defence record, full quality gate, and real extracted DOCX/PDF text before returning both documents.
+
 Define how estimated metrics are bounded and documented for each project type. Decide how an owner can revoke approval after a previous export without silently rewriting already downloaded files.
