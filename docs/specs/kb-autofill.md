@@ -28,3 +28,18 @@ The content repository remains private and must be named only by its placeholder
 ## Open questions
 
 Choose fuzzy-match thresholds and a review owner based on a labelled set of topics. Define how to reconcile a PR merged after its module was deleted without resurrecting the module link.
+
+## Worker integration (gap 3)
+
+After the module's interview, score, readability, and injected quality gates pass, the owner-only worker calls autofill once for the entries. It uses an injected content client for topic lookup, section lookup, and proposed changes. Without an injected client it uses an in-memory dry-run client: even a proposed new topic creates only a private review plan, never a network call or content write. For example, a fictional `example-topic` alias can produce a live reference for the matching entry, while an uncreated topic stays pending. A live client belongs in a separate reviewed `<private-content-repo>` change.
+
+A future live client must supply its own matcher and pass real `companyNames` and `privateNames` to `autofill`; the worker's empty lists and placeholder matcher are safe only with its dry-run client.
+
+The worker stores only the contract's slug, section ID, and state in each matching entry's `kbRefs`. It writes the dry-run plan to the protected job workspace with mode 0600 before publishing the module pointer. If autofill fails, it stores `KB_AUTOFILL_FAILED` privately and completes the already-gated module without new references. It does not turn a pending reference into a live one. The module-only command-line dry run still never reads a real CV.
+
+1. **AC5:** An alias and a proposed topic attach only to their source entries; a pending proposal stays pending. Check a fictional multi-entry worker job.
+2. **AC6:** With no client injected, the worker records a private dry-run plan and performs no real content or network write. Check the plan mode and a temporary workspace fixture.
+3. **AC7:** An autofill error records `KB_AUTOFILL_FAILED`, keeps the gate result, and publishes no invented reference. Check a failing injected client after the quality gate.
+4. **AC8:** The persisted references survive `toContentModule` unchanged and pass the mirrored content rules with reviewed metadata. Check a fictional mapped module; do not change either validator.
+
+Live content PRs and regression tests in `<private-content-repo>`, bot delivery, the gap 2 manifest, and production lifecycle adapters remain separate work.

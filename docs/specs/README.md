@@ -1,5 +1,7 @@
 # System specifications
 
+The [KB autofill worker integration](kb-autofill.md#worker-integration-gap-3) defines the dry-run content client, private plan, and fail-closed module handoff. For example, a fictional pending topic stays pending after it reaches a module entry.
+
 The [worker-to-content mapping](module-content-mapping.md) explains why reviewed bilingual metadata and real key points are required before a fictional worker result can be indexed. It does not publish a module.
 
 These specifications describe how a job description (JD) becomes a tailored curriculum vitae (CV), an interview study module, and downloadable files. They define behavior and checks for later implementation; they do not themselves enable a service. For example, a sample JD for a fictional frontend role can produce a study module without putting the applicant's CV in Git.

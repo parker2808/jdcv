@@ -97,6 +97,9 @@ importers:
       '@jdcv/gates':
         specifier: workspace:*
         version: link:../gates
+      '@jdcv/kb-autofill':
+        specifier: workspace:*
+        version: link:../kb-autofill
       '@jdcv/prompts':
         specifier: workspace:*
         version: link:../prompts

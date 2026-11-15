@@ -1,8 +1,13 @@
-import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { FileJobQueue } from '@jdcv/queue';
+import { moduleV2Schema, toContentModule } from '@jdcv/contracts';
+import {
+  checkContentRules,
+  contentIndexRow,
+} from '../../contracts/src/fixtures/content-rules.js';
 import { SharedGateLock } from './adapters.js';
 import {
   MacWorker,
@@ -10,6 +15,7 @@ import {
   type RelayRunner,
   type Role,
   type Thread,
+  DryRunKbContentClient,
 } from './index.js';
 
 const exampleModule = {
@@ -42,6 +48,7 @@ describe('MacWorker', () => {
   let load: number;
   let score: number;
   let revisions: number;
+  let generatedModule: object;
   const prompts = {
     build: (
       role: Role,
@@ -62,6 +69,7 @@ describe('MacWorker', () => {
     load = 24;
     score = 4;
     revisions = 0;
+    generatedModule = structuredClone(exampleModule);
   });
   afterEach(async () => {
     await rm(root, { recursive: true, force: true });
@@ -81,12 +89,17 @@ describe('MacWorker', () => {
         stages.push(`${thread.id}:${revision}`);
         if (thread.id === 'Generator') {
           revisions++;
-          await writeFile(paths.module, JSON.stringify(exampleModule));
+          await writeFile(paths.module, JSON.stringify(generatedModule));
         }
         if (thread.id === 'Interviewer')
           await writeFile(
             paths.interview,
-            JSON.stringify({ covered: ['frontend'], defended: ['claim'] }),
+            JSON.stringify({
+              covered: (
+                generatedModule as typeof exampleModule
+              ).requirements.map((item) => item.id),
+              defended: ['claim'],
+            }),
           );
         if (thread.id === 'Examiner')
           await writeFile(
@@ -96,7 +109,11 @@ describe('MacWorker', () => {
               mandatoryCoverage: 1,
               embellishmentDefenses: [4],
               criticalFindings: 0,
-              readability: { entry: 4 },
+              readability: Object.fromEntries(
+                (generatedModule as typeof exampleModule).entries.map(
+                  (entry) => [entry.id, 4],
+                ),
+              ),
             }),
           );
       },
@@ -138,12 +155,156 @@ describe('MacWorker', () => {
       'start:Examiner',
       'Examiner:0',
     ]);
-    expect(JSON.parse(await readFile(result!.outputRef!, 'utf8'))).toEqual(
-      exampleModule,
-    );
+    const saved = JSON.parse(await readFile(result!.outputRef!, 'utf8'));
+    expect(saved.entries[0].kbRefs).toEqual([
+      { slug: 'frontend-role', sectionId: 'overview', state: 'pending' },
+    ]);
+    expect(
+      (await stat(join(root, 'jobs', job.id, 'kb-autofill-plan.json'))).mode &
+        0o777,
+    ).toBe(0o600);
+    expect(
+      JSON.parse(
+        await readFile(
+          join(root, 'jobs', job.id, 'kb-autofill-plan.json'),
+          'utf8',
+        ),
+      ).proposals,
+    ).toHaveLength(1);
     expect(
       await queue.complete(job.id, result!.leaseToken!, result!.outputRef!),
     ).toEqual(result);
+  });
+
+  it('attaches alias and pending links only to their entries and preserves content mapping', async () => {
+    generatedModule = {
+      ...structuredClone(exampleModule),
+      requirements: [
+        {
+          id: 'frontend',
+          title: { en: 'keyboard-navigation', vi: 'Bàn phím' },
+        },
+        { id: 'other', title: { en: 'example-topic', vi: 'Chủ đề ví dụ' } },
+      ],
+      entries: [
+        {
+          ...structuredClone(exampleModule.entries[0]),
+          keyPoints: [{ en: 'Test keyboard input.', vi: 'Thử bàn phím.' }],
+        },
+        {
+          ...structuredClone(exampleModule.entries[0]),
+          id: 'other-entry',
+          jdRequirement: 'other',
+          embellishmentRefs: [],
+          keyPoints: [{ en: 'Test a form.', vi: 'Thử biểu mẫu.' }],
+        },
+      ],
+    };
+    const topics = [
+      {
+        slug: 'example-existing',
+        title: 'Focus',
+        aliases: ['keyboard-navigation'],
+        tags: [],
+        sections: [{ id: 'focus', heading: 'Focus' }],
+      },
+    ];
+    const client = new DryRunKbContentClient(topics);
+    const job = await queue.enqueue(jobInput(input));
+    const result = await new MacWorker({
+      queue,
+      runner: runner(),
+      prompts,
+      ownerId: 'owner',
+      moduleOnlyDryRun: true,
+      load: { read: async () => 24 },
+      workspaceRoot: join(root, 'jobs'),
+      repoRoot: process.cwd(),
+      kbClient: client,
+      qualityGate: { run: async () => ({ passed: true, failures: [] }) },
+    }).runOnce();
+    expect(result?.status).toBe('completed');
+    const saved = moduleV2Schema.parse(
+      JSON.parse(await readFile(result!.outputRef!, 'utf8')),
+    );
+    expect(saved.entries[0].kbRefs).toEqual([
+      { slug: 'example-existing', sectionId: 'focus', state: 'live' },
+    ]);
+    expect(saved.entries[1].kbRefs).toEqual([
+      { slug: 'example-topic', sectionId: 'overview', state: 'pending' },
+    ]);
+    expect(saved.qualityGate?.passed).toBe(true);
+    expect(client.plan).toHaveLength(1);
+    const meta = {
+      slug: 'example-module',
+      organizationAlias: 'Example Labs',
+      role: { en: 'Developer', vi: 'Lập trình viên' },
+      level: { en: 'Sample', vi: 'Mẫu' },
+      date: '2026-11-16',
+      tags: [],
+      status: 'active' as const,
+      title: { en: 'Example module', vi: 'Module ví dụ' },
+      summary: { en: 'A fictional module.', vi: 'Module giả định.' },
+      fixture: true,
+    };
+    const mapped = toContentModule(saved, meta);
+    expect(mapped.entries.map((entry) => entry.kbRefs)).toEqual(
+      saved.entries.map((entry) => entry.kbRefs),
+    );
+    const original = {
+      slug: 'legacy-pack',
+      source: 'legacy-pack/legacy-pack-prep.json',
+      organizationAlias: 'Example Labs',
+      role: meta.role,
+      level: meta.level,
+      date: meta.date,
+      tags: [],
+      status: 'active',
+      title: meta.title,
+      summary: meta.summary,
+    };
+    expect(
+      checkContentRules(
+        mapped,
+        { version: 2, modules: [original, contentIndexRow(mapped)] },
+        original,
+      ),
+    ).toEqual([]);
+    expect(job.id).toBeTruthy();
+  });
+
+  it('records an autofill failure without inventing references after quality passes', async () => {
+    const job = await queue.enqueue(jobInput(input));
+    const result = await new MacWorker({
+      queue,
+      runner: runner(),
+      prompts,
+      ownerId: 'owner',
+      moduleOnlyDryRun: true,
+      load: { read: async () => 24 },
+      workspaceRoot: join(root, 'jobs'),
+      repoRoot: process.cwd(),
+      qualityGate: { run: async () => ({ passed: true, failures: [] }) },
+      kbMatcher: {
+        extract: async () => {
+          throw new Error('fixture failure');
+        },
+        judge: async () => ({ match: 'none' }),
+        generate: async () => '',
+      },
+    }).runOnce();
+    expect(result?.status).toBe('completed');
+    const saved = JSON.parse(await readFile(result!.outputRef!, 'utf8'));
+    expect(saved.entries[0].kbRefs).toBeUndefined();
+    expect(saved.qualityGate.passed).toBe(true);
+    expect(
+      JSON.parse(
+        await readFile(
+          join(root, 'jobs', job.id, 'kb-autofill-result.json'),
+          'utf8',
+        ),
+      ),
+    ).toEqual({ reason: 'KB_AUTOFILL_FAILED' });
   });
 
   it('stops after two self-fix revisions', async () => {
