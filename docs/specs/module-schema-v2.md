@@ -10,7 +10,7 @@ Provide a Zod runtime validator and generated JSON Schema for a versioned module
 
 ## Design
 
-Version 1 has `{version, requirements[], entries[]}`. Each entry has `{id, section, jdRequirement, tags, title, shortAnswer, keyPoints, detail}` in English and Vietnamese as represented by the existing pack. The implementation must inspect the actual version 1 field nesting before defining the exact Zod types; the converter preserves that nesting rather than guessing a new translation layout. Accept version 1 input through a compatibility parser, convert it to version 2, then validate it with Zod and its generated JSON Schema. Keep the original version 1 data path available, including the `fde/` reader; Phase 1 stores new modules in `<private-content-repo>` under `modules/<jd-slug>.json` with an index, without moving old packs.
+Version 1 has `{version, requirements[], entries[]}`. Each entry has `{id, section, jdRequirement, tags, title, shortAnswer, keyPoints, detail}` in English and Vietnamese as represented by the existing pack. The implementation must inspect the actual version 1 field nesting before defining the exact Zod types; the converter preserves that nesting rather than guessing a new translation layout. Accept version 1 input through a compatibility parser, convert it to version 2, then validate it with Zod and its generated JSON Schema. Keep existing version 1 data paths and readers available without naming private paths in public fixtures; Phase 1 stores new modules in `<private-content-repo>` under `modules/<jd-slug>.json` with an index, without moving old packs.
 
 Version 2 retains the version 1 fields, sets `version` to `2`, and adds optional `kbRefs` and `embellishmentRefs` arrays to entries. A knowledge reference identifies a canonical topic and section plus a `pending`, `live`, or `rejected` state; the UI must not treat a pending reference as a published link. An embellishment reference identifies an approved-or-pending change in the CV review record; the study entry used to defend that change is referenced by its entry ID. These are identifiers, never CV text. The module can carry archive timestamps and source metadata in the later database model, but defaults for compatibility must not change old answers.
 
@@ -25,7 +25,7 @@ Only fictional fixtures may be checked into this public repository. References m
 1. **AC1:** Every required version 1 entry field and both language values survive conversion without changed text, IDs, or order. Check a synthetic bilingual version 1 fixture with deep equality on the preserved fields, then render it through the existing reader.
 2. **AC2:** Zod and generated JSON Schema accept the same valid version 2 fixture and reject missing required translations, duplicate entry IDs, and malformed references. Check a shared positive/negative fixture matrix in unit tests.
 3. **AC3:** Conversion is deterministic and does not invent references: two runs produce identical output with empty new arrays. Check repeated conversion and snapshot comparison.
-4. **AC4:** An old FDE pack remains available unchanged and a version 2 module can be indexed alongside it. Check the old reader and the new index validator in an integration fixture.
+4. **AC4:** An old version 1 pack remains available unchanged and a version 2 module can be indexed alongside it. Check the old reader and the new index validator with fictional fixtures such as `legacy-pack-v1.json` and `legacy-pack-v2.json`.
 
 ## Open questions
 

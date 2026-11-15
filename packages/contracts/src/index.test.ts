@@ -1,8 +1,8 @@
 import Ajv from 'ajv';
 import { z } from 'zod';
 import { describe, expect, it } from 'vitest';
-import v1 from './fixtures/fde-v1.json';
-import v2 from './fixtures/fde-v2.json';
+import v1 from './fixtures/legacy-pack-v1.json';
+import v2 from './fixtures/legacy-pack-v2.json';
 import indexSchema from '../schemas/module-index.schema.json';
 import v1JsonSchema from '../schemas/module-v1.schema.json';
 import v2JsonSchema from '../schemas/module-v2.schema.json';
@@ -138,7 +138,7 @@ describe('module contracts', () => {
   it('accepts old and new modules together in an index', () => {
     const index = {
       modules: [
-        { slug: 'fde', path: 'fde/', version: 1 },
+        { slug: 'legacy-pack', path: 'legacy-pack/', version: 1 },
         { slug: 'sample', path: 'modules/sample.json', version: 2 },
       ],
     };
