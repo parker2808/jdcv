@@ -15,7 +15,10 @@ const sample = JSON.parse(
 const moduleSample = JSON.parse(
   readFileSync(
     fileURLToPath(
-      new URL('../../contracts/src/fixtures/fde-v2.json', import.meta.url),
+      new URL(
+        '../../contracts/src/fixtures/legacy-pack-v2.json',
+        import.meta.url,
+      ),
     ),
     'utf8',
   ),
