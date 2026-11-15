@@ -155,6 +155,148 @@ export type ModuleV1 = z.infer<typeof moduleV1Schema>;
 export type ModuleV2 = z.infer<typeof moduleV2Schema>;
 export type ModuleIndex = z.infer<typeof moduleIndexSchema>;
 
+const contentDate = z.iso.date();
+const contentTimestamp = z.iso.datetime({ offset: true });
+const contentMetadata = z
+  .strictObject({
+    slug: z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+    organizationAlias: localizedText,
+    role: localized,
+    level: localized,
+    date: contentDate,
+    tags: z.array(z.string()),
+    status: z.enum(['active', 'archived']),
+    archivedAt: contentTimestamp.optional(),
+    purgeAfter: contentTimestamp.optional(),
+    autoArchive: z.boolean().optional(),
+    lastOpenedAt: contentTimestamp.optional(),
+    title: localized,
+    summary: localized,
+    testScore: z.number().min(0).max(100).optional(),
+    fixture: z.boolean().optional(),
+  })
+  .superRefine((meta, context) => {
+    if (meta.status === 'active' && (meta.archivedAt || meta.purgeAfter)) {
+      context.addIssue({
+        code: 'custom',
+        path: ['status'],
+        message: 'Active modules cannot have archive timestamps',
+      });
+    }
+    if (meta.status === 'archived') {
+      if (!meta.archivedAt || !meta.purgeAfter) {
+        context.addIssue({
+          code: 'custom',
+          path: ['archivedAt', 'purgeAfter'],
+          message: 'Archived modules require both timestamps',
+        });
+      } else if (
+        Date.parse(meta.purgeAfter) - Date.parse(meta.archivedAt) !==
+        7 * 86400000
+      ) {
+        context.addIssue({
+          code: 'custom',
+          path: ['purgeAfter'],
+          message: 'Purge must be exactly seven days after archive',
+        });
+      }
+    }
+  });
+
+export type ContentModuleMeta = z.input<typeof contentMetadata>;
+export type ContentModule = z.output<typeof contentMetadata> & {
+  version: 2;
+  requirements: ModuleV2['requirements'];
+  entries: (Omit<ModuleV2['entries'][number], 'embellishmentRefs'> & {
+    embellishmentRefs?: string[];
+  })[];
+};
+
+export function toContentModule(
+  module: ModuleV2,
+  meta: ContentModuleMeta,
+): ContentModule {
+  const parsedModule = moduleV2Schema.parse(module);
+  const parsedMeta = contentMetadata.safeParse(meta);
+  if (!parsedMeta.success) {
+    throw new Error(
+      `Invalid content metadata: ${z.prettifyError(parsedMeta.error)}`,
+    );
+  }
+  const requirementIds = new Set(
+    parsedModule.requirements.map((item) => item.id),
+  );
+  const entries = parsedModule.entries.map((entry, index) => {
+    if (!requirementIds.has(entry.jdRequirement)) {
+      throw new Error(
+        `entries[${index}].jdRequirement: required existing requirement ID`,
+      );
+    }
+    if (!entry.keyPoints.length) {
+      throw new Error(
+        `entries[${index}].keyPoints: at least one bilingual key point required`,
+      );
+    }
+    return {
+      id: entry.id,
+      section: entry.section,
+      jdRequirement: entry.jdRequirement,
+      tags: [...entry.tags],
+      title: { ...entry.title },
+      shortAnswer: { ...entry.shortAnswer },
+      keyPoints: entry.keyPoints.map((point) => ({ ...point })),
+      detail: { ...entry.detail },
+      ...(entry.kbRefs === undefined
+        ? {}
+        : {
+            kbRefs: entry.kbRefs.map((ref) => ({
+              slug: ref.slug,
+              sectionId: ref.sectionId,
+              state: ref.state,
+            })),
+          }),
+      ...(entry.embellishmentRefs === undefined
+        ? {}
+        : { embellishmentRefs: entry.embellishmentRefs.map((ref) => ref.id) }),
+    };
+  });
+  return {
+    version: parsedModule.version,
+    slug: parsedMeta.data.slug,
+    organizationAlias: parsedMeta.data.organizationAlias,
+    role: { ...parsedMeta.data.role },
+    level: { ...parsedMeta.data.level },
+    date: parsedMeta.data.date,
+    tags: [...parsedMeta.data.tags],
+    status: parsedMeta.data.status,
+    ...(parsedMeta.data.archivedAt === undefined
+      ? {}
+      : { archivedAt: parsedMeta.data.archivedAt }),
+    ...(parsedMeta.data.purgeAfter === undefined
+      ? {}
+      : { purgeAfter: parsedMeta.data.purgeAfter }),
+    ...(parsedMeta.data.autoArchive === undefined
+      ? {}
+      : { autoArchive: parsedMeta.data.autoArchive }),
+    ...(parsedMeta.data.lastOpenedAt === undefined
+      ? {}
+      : { lastOpenedAt: parsedMeta.data.lastOpenedAt }),
+    title: { ...parsedMeta.data.title },
+    summary: { ...parsedMeta.data.summary },
+    ...(parsedMeta.data.testScore === undefined
+      ? {}
+      : { testScore: parsedMeta.data.testScore }),
+    ...(parsedMeta.data.fixture === undefined
+      ? {}
+      : { fixture: parsedMeta.data.fixture }),
+    requirements: parsedModule.requirements.map((item) => ({
+      id: item.id,
+      title: { ...item.title },
+    })),
+    entries,
+  };
+}
+
 export function convertModuleV1ToV2(input: unknown): ModuleV2 {
   if (
     typeof input === 'object' &&

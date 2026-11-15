@@ -6,7 +6,7 @@ JDCV Prep helps turn a job description into a tailored CV and interview study pa
 
 The repository is pre-alpha and contains a workspace starter, a local file job queue, shared module contracts, an injectable module lifecycle, a standalone CV renderer with a fictional sample template, pure prompt templates, quality gates, and a Mac worker with a fake-model dry run. Phase 1 is owner-only: the planned web view will show results and link to a Telegram conversation. No production service, personal CV, account integration, or deployment exists in this repository yet.
 
-The [isolated Phase 1 dry run](docs/e2e-dryrun-gap-report.md) completed one fictional bot-to-worker queue job, but its output could not be used for approved CV export, bot delivery, or the private content schema. A separate adapted fixture rendered in the local web app; this is not a successful end-to-end CV run. The report lists five unresolved integration gaps and no production effects.
+The [isolated Phase 1 dry run](docs/e2e-dryrun-gap-report.md) completed one fictional bot-to-worker queue job, but its output could not be used for approved CV export, bot delivery, or the private content schema. An explicit pure mapper now prepares a content document only when reviewed metadata and nonempty key points are supplied; it does not connect the worker to publication. A separate adapted fixture rendered in the local web app; this is not a successful end-to-end CV run. The report lists five integration gaps and no production effects.
 
 ## Planned phases
 
@@ -22,6 +22,7 @@ The production data service and its configuration are not available yet. `JobQue
 
 ## Changelog
 
+- 2026-11-16: Added a reviewed worker-to-content mapper and fictional regression against mirrored content rules. Separate follow-ups: worker publication and content PRs, private content regression, knowledge-base autofill (gap 3), the remaining CV approval interface (gap 1), delivery manifest (gap 2), and lifecycle adapters (gap 5). No site or production data was changed.
 - 2026-11-16: Added the owner-only private DOCX-to-proposal stage in the Mac worker. Fictional tests cover paragraph-grounded facts, pending decisions, rejection restoration, and approved DOCX rendering. PDF-only input, a protected decision interface in `<private-bot-repo>`, delivery manifest and handoff (gap 2), knowledge-base autofill adapter (gap 3), content module mapping (gap 4, separate thread), and production lifecycle adapters (gap 5) remain separate work; no real CV or production worker was accessed.
 
 - 2026-11-16: Recorded one isolated, owner-only Phase 1 dry run, its five unresolved integration gaps, and the boundary between a passing fictional fixture and a real CV delivery. No live change or real delivery was made.
