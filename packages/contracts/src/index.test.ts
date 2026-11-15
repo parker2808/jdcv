@@ -6,7 +6,9 @@ import v2 from './fixtures/fde-v2.json';
 import indexSchema from '../schemas/module-index.schema.json';
 import v1JsonSchema from '../schemas/module-v1.schema.json';
 import v2JsonSchema from '../schemas/module-v2.schema.json';
+import deliveryJsonSchema from '../schemas/delivery-manifest-v1.schema.json';
 import {
+  deliveryManifestSchema,
   checkModuleLanguageParity,
   convertModuleV1ToV2,
   moduleIndexSchema,
@@ -154,6 +156,7 @@ describe('module contracts', () => {
       [moduleV1Schema, v1JsonSchema],
       [moduleV2Schema, v2JsonSchema],
       [moduleIndexSchema, indexSchema],
+      [deliveryManifestSchema, deliveryJsonSchema],
     ] as const) {
       const generated = z.toJSONSchema(schema, { target: 'draft-07' });
       generated['x-jdcv-integrity'] = committed['x-jdcv-integrity'];

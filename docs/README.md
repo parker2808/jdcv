@@ -10,11 +10,14 @@ The [Phase 1 end-to-end dry-run gap report](e2e-dryrun-gap-report.md) explains w
 
 The [owner CV proposal implementation specification](specs/2026-11-16-grounded-cv-approval.md) describes the private DOCX source, source citations, pending decisions, and export boundary. For example, a proposed line for Example Labs must be approved individually; a module-only dry run is not approval.
 
+The [private delivery manifest contract](specs/delivery-manifest.md) describes the protected, versioned handoff and its read-side file checks. For example, a missing fictional `approved.pdf` blocks use of the result even if a manifest is present.
+
 The specifications cover:
 
 - [JD module schema v2](specs/module-schema-v2.md), including compatibility with existing bilingual study packs.
 - [Job queue and Mac worker](specs/job-queue-and-mac-worker.md), including retries and outbound polling.
 - [CV export](specs/cv-export.md), including Word and PDF output from approved data.
+- [Private delivery manifest](specs/delivery-manifest.md), including owner decisions and checked files.
 - [Controlled CV embellishment](specs/cv-embellishment.md), including line-by-line approval.
 - [Interview knowledge-base autofill](specs/kb-autofill.md), including topic matching and pending links.
 - [Module deletion and archiving](specs/module-delete-and-archive.md), including undo and retention of shared knowledge.
