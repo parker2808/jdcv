@@ -4,6 +4,8 @@
 
 ## Help / usage
 
+The owner-only `deliveryManifestSchema` and `DeliveryManifest` type define a separate version 1 handoff after all proposed CV lines are decided and both exports pass their gates. The generated schema is `@jdcv/contracts/schemas/delivery-manifest-v1`. For example, a fictional `example-job` manifest lists `approved.docx` and `approved.pdf` by relative file name, byte length, and SHA-256 digest. A consumer must also verify the decision-to-approval relationship and read private regular files without following links; JSON Schema cannot check file contents or filesystem links. See the [delivery manifest specification](../../docs/specs/delivery-manifest.md).
+
 Import `moduleV1Schema`, `moduleV2Schema`, `moduleIndexSchema`, `convertModuleV1ToV2`, and `checkModuleLanguageParity` from `@jdcv/contracts`. The converter takes an unknown value, rejects invalid version 1 data with a field path, and returns a version 2 value. Calling it with a valid version 2 module returns the same data. It performs no file or network work.
 
 Import `toContentModule` when a reviewed owner-only worker result needs the content document shape. Pass a `ModuleV2` and `ContentModuleMeta` containing reviewed bilingual labels, date, alias, tags, and lifecycle status. For example, `toContentModule(workerModule, reviewedMeta)` copies a pending knowledge-base reference without making it live, converts a CV-review reference to its ID, and rejects an entry with no real key point. It does not create the index or publish content. See the [field-by-field mapping](../../docs/specs/module-content-mapping.md).

@@ -1,4 +1,6 @@
 import { z } from 'zod';
+export { deliveryManifestSchema } from './delivery-manifest.js';
+export type { DeliveryManifest } from './delivery-manifest.js';
 
 const identifier = z.string().min(1);
 const localizedText = z.string().min(1).regex(/\S/);

@@ -368,3 +368,8 @@ export class MacWorker {
 }
 
 class RubricFailure extends Error {}
+
+export {
+  readDeliveryManifest,
+  writeDeliveryManifest,
+} from './delivery-manifest.js';

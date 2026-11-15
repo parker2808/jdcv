@@ -1,6 +1,7 @@
 import {
   mkdtemp,
   mkdir,
+  lstat,
   readFile,
   rm,
   symlink,
@@ -8,6 +9,7 @@ import {
 } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { createHash } from 'node:crypto';
 import mammoth from 'mammoth';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import {
@@ -20,6 +22,10 @@ import type { CvFacts, OwnerRules } from '@jdcv/gates';
 import type { ModuleV2 } from '@jdcv/contracts';
 import { FileJobQueue } from '@jdcv/queue';
 import { MacWorker, type Role } from './index.js';
+import {
+  readDeliveryManifest,
+  writeDeliveryManifest,
+} from './delivery-manifest.js';
 import {
   applyOwnerDecision,
   approvedCv,
@@ -453,5 +459,183 @@ describe('owner-only CV proposal', () => {
         async () => ({ entries: [{ entryId: 'defense-1', score: 4 }] }),
       ),
     ).resolves.toBeUndefined();
+  });
+  const deliver = async (selected: CvProposal = proposal) =>
+    writeDeliveryManifest({
+      resultDir: join(root, 'result'),
+      jobId: 'example-job',
+      ownerId: 'example-owner',
+      proposal: selected,
+      exported: {
+        docx: Buffer.from('fictional approved Word bytes'),
+        pdf: Buffer.from('fictional approved PDF bytes'),
+        approval: approvedCv(selected).approval,
+      },
+    });
+
+  it('publishes documents before a private, complete manifest', async () => {
+    const selected = applyOwnerDecision(proposal, {
+      id: 'edit-1',
+      decision: 'rejected',
+    });
+    const manifest = await deliver(selected);
+    expect((await readDeliveryManifest(join(root, 'result'))).diff).toEqual(
+      manifest.diff,
+    );
+    expect(manifest.diff[0]?.decision).toBe('rejected');
+    for (const name of [
+      'approved.docx',
+      'approved.pdf',
+      'delivery-manifest.json',
+    ])
+      expect((await lstat(join(root, 'result', name))).mode & 0o777).toBe(
+        0o600,
+      );
+    expect((await lstat(join(root, 'result'))).mode & 0o777).toBe(0o700);
+  });
+
+  it('keeps an approved fictional edit and its defence in the handoff', async () => {
+    const decided = applyOwnerDecision(proposal, {
+      id: 'edit-1',
+      decision: 'approved',
+    });
+    const defended = {
+      ...decided,
+      lines: [{ ...decided.lines[0]!, defenseScore: 4 }],
+    };
+    const result = await deliver(defended);
+    expect(result.diff[0]?.decision).toBe('approved');
+    expect(result.approval.embellishments[0]?.defenseScore).toBe(4);
+    await expect(readDeliveryManifest(join(root, 'result'))).resolves.toEqual(
+      result,
+    );
+  });
+
+  it('holds pending proposals and mismatched export approvals without a manifest', async () => {
+    await expect(deliver()).rejects.toThrow();
+    const selected = applyOwnerDecision(proposal, {
+      id: 'edit-1',
+      decision: 'rejected',
+    });
+    await expect(
+      writeDeliveryManifest({
+        resultDir: join(root, 'result'),
+        jobId: 'example-job',
+        ownerId: 'example-owner',
+        proposal: selected,
+        exported: {
+          docx: Buffer.from('docx'),
+          pdf: Buffer.from('pdf'),
+          approval: baseApproval,
+        },
+      }),
+    ).rejects.toThrow();
+    await expect(
+      lstat(join(root, 'result', 'delivery-manifest.json')),
+    ).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it('refuses tampered bytes, missing files and altered hashes', async () => {
+    await deliver(
+      applyOwnerDecision(proposal, { id: 'edit-1', decision: 'rejected' }),
+    );
+    const resultDir = join(root, 'result');
+    const docx = join(resultDir, 'approved.docx');
+    const original = await readFile(docx);
+    await writeFile(docx, Buffer.from('tampered'));
+    await expect(readDeliveryManifest(resultDir)).rejects.toThrow();
+    await writeFile(docx, original);
+    const manifestPath = join(resultDir, 'delivery-manifest.json');
+    const manifest = JSON.parse(await readFile(manifestPath, 'utf8'));
+    manifest.docx.sha256 = createHash('sha256').update('other').digest('hex');
+    await writeFile(manifestPath, JSON.stringify(manifest));
+    await expect(readDeliveryManifest(resultDir)).rejects.toThrow();
+    manifest.docx.sha256 = createHash('sha256').update(original).digest('hex');
+    await writeFile(manifestPath, JSON.stringify(manifest));
+    await rm(docx);
+    await expect(readDeliveryManifest(resultDir)).rejects.toThrow();
+  });
+
+  it('rejects path escapes, absolute names, links and incomplete decisions', async () => {
+    await deliver(
+      applyOwnerDecision(proposal, { id: 'edit-1', decision: 'rejected' }),
+    );
+    const resultDir = join(root, 'result');
+    const manifestPath = join(resultDir, 'delivery-manifest.json');
+    const original = JSON.parse(await readFile(manifestPath, 'utf8'));
+    for (const name of [
+      '../outside.docx',
+      join(root, 'outside.docx'),
+      'sub/approved.docx',
+    ]) {
+      await writeFile(
+        manifestPath,
+        JSON.stringify({
+          ...original,
+          docx: { ...original.docx, fileName: name },
+        }),
+      );
+      await expect(readDeliveryManifest(resultDir)).rejects.toThrow();
+    }
+    await writeFile(
+      manifestPath,
+      JSON.stringify({
+        ...original,
+        diff: [{ ...original.diff[0], decision: 'pending' }],
+      }),
+    );
+    await expect(readDeliveryManifest(resultDir)).rejects.toThrow();
+    await writeFile(manifestPath, JSON.stringify(original));
+    await rm(join(resultDir, 'approved.docx'));
+    await symlink(
+      join(directory, 'general.docx'),
+      join(resultDir, 'approved.docx'),
+    );
+    await expect(readDeliveryManifest(resultDir)).rejects.toThrow();
+  });
+
+  it('does not expose a manifest after a partial write', async () => {
+    const resultDir = join(root, 'result');
+    await mkdir(resultDir, { mode: 0o700 });
+    await writeFile(join(resultDir, 'approved.docx'), 'partial', {
+      mode: 0o600,
+    });
+    await writeFile(join(resultDir, '.interrupted.tmp'), '{}', { mode: 0o600 });
+    await expect(readDeliveryManifest(resultDir)).rejects.toMatchObject({
+      code: 'ENOENT',
+    });
+    await expect(
+      lstat(join(resultDir, 'delivery-manifest.json')),
+    ).rejects.toMatchObject({ code: 'ENOENT' });
+  });
+
+  it('refuses a linked result directory and an existing output file', async () => {
+    const selected = applyOwnerDecision(proposal, {
+      id: 'edit-1',
+      decision: 'rejected',
+    });
+    await symlink(directory, join(root, 'linked-result'));
+    await expect(
+      writeDeliveryManifest({
+        resultDir: join(root, 'linked-result'),
+        jobId: 'example-job',
+        ownerId: 'example-owner',
+        proposal: selected,
+        exported: {
+          docx: Buffer.from('docx'),
+          pdf: Buffer.from('pdf'),
+          approval: approvedCv(selected).approval,
+        },
+      }),
+    ).rejects.toThrow();
+    const resultDir = join(root, 'result');
+    await mkdir(resultDir, { mode: 0o700 });
+    await writeFile(join(resultDir, 'approved.docx'), 'existing', {
+      mode: 0o600,
+    });
+    await expect(deliver(selected)).rejects.toThrow();
+    await expect(
+      lstat(join(resultDir, 'delivery-manifest.json')),
+    ).rejects.toMatchObject({ code: 'ENOENT' });
   });
 });

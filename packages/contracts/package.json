@@ -12,7 +12,8 @@
     },
     "./schemas/v1": "./schemas/module-v1.schema.json",
     "./schemas/v2": "./schemas/module-v2.schema.json",
-    "./schemas/index": "./schemas/module-index.schema.json"
+    "./schemas/index": "./schemas/module-index.schema.json",
+    "./schemas/delivery-manifest-v1": "./schemas/delivery-manifest-v1.schema.json"
   },
   "files": [
     "dist",
