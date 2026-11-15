@@ -22,6 +22,8 @@ The production data service and its configuration are not available yet. `JobQue
 
 ## Changelog
 
+- 2026-11-16: Added the owner-only private DOCX-to-proposal stage in the Mac worker. Fictional tests cover paragraph-grounded facts, pending decisions, rejection restoration, and approved DOCX rendering. PDF-only input, a protected decision interface in `<private-bot-repo>`, delivery manifest and handoff (gap 2), knowledge-base autofill adapter (gap 3), content module mapping (gap 4, separate thread), and production lifecycle adapters (gap 5) remain separate work; no real CV or production worker was accessed.
+
 - 2026-11-16: Recorded one isolated, owner-only Phase 1 dry run, its five unresolved integration gaps, and the boundary between a passing fictional fixture and a real CV delivery. No live change or real delivery was made.
 
 - 2026-11-15: Added owner-only module archive, restore, purge, inactivity warning, and a safe CLI with injectable adapters and fictional tests. Production storage and notification adapters, the bot integration, the private data change, and the web button remain separate tasks; Git removal does not erase history.

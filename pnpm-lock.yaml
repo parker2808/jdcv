@@ -91,9 +91,24 @@ importers:
       '@jdcv/contracts':
         specifier: workspace:*
         version: link:../contracts
+      '@jdcv/cv-render':
+        specifier: workspace:*
+        version: link:../cv-render
+      '@jdcv/gates':
+        specifier: workspace:*
+        version: link:../gates
+      '@jdcv/prompts':
+        specifier: workspace:*
+        version: link:../prompts
       '@jdcv/queue':
         specifier: workspace:*
         version: link:../queue
+      mammoth:
+        specifier: ^1.9.0
+        version: 1.13.0
+      zod:
+        specifier: ^3.24.0
+        version: 3.25.76
 
   packages/module-lifecycle:
     dependencies:
