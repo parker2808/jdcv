@@ -1,0 +1,22 @@
+{
+  "name": "@jdcv/module-lifecycle",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "jdcv-module": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "cli": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "@jdcv/contracts": "workspace:*",
+    "@jdcv/queue": "workspace:*"
+  },
+  "devDependencies": {
+    "@jdcv/gates": "workspace:*"
+  }
+}

@@ -95,6 +95,19 @@ importers:
         specifier: workspace:*
         version: link:../queue
 
+  packages/module-lifecycle:
+    dependencies:
+      '@jdcv/contracts':
+        specifier: workspace:*
+        version: link:../contracts
+      '@jdcv/queue':
+        specifier: workspace:*
+        version: link:../queue
+    devDependencies:
+      '@jdcv/gates':
+        specifier: workspace:*
+        version: link:../gates
+
   packages/prompts:
     dependencies:
       '@jdcv/contracts':
