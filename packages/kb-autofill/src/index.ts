@@ -10,6 +10,7 @@ export interface Topic {
 }
 export interface Link {
   moduleId: string;
+  sourceTopic?: string;
   kbSlug: string;
   sectionId: string;
   matchType: 'exact' | 'alias' | 'fuzzy' | 'judged' | 'partial' | 'new';
@@ -120,6 +121,7 @@ export async function autofill(
       if (existing) {
         links.push({
           moduleId: request.moduleId,
+          sourceTopic: slug,
           kbSlug: existing.slug,
           sectionId: existing.sections[0]?.id ?? 'overview',
           matchType: exact ? 'exact' : 'alias',
@@ -134,6 +136,7 @@ export async function autofill(
       if (alreadyPending) {
         links.push({
           moduleId: request.moduleId,
+          sourceTopic: slug,
           kbSlug: alreadyPending.slug,
           sectionId: alreadyPending.sectionId,
           matchType: 'new',
@@ -172,6 +175,7 @@ export async function autofill(
       if (judgment.match === 'full' && matched) {
         links.push({
           moduleId: request.moduleId,
+          sourceTopic: slug,
           kbSlug: matched.slug,
           sectionId:
             judgment.sectionId ?? matched.sections[0]?.id ?? 'overview',
@@ -184,6 +188,7 @@ export async function autofill(
         if (matched.sections.some((section) => section.id === sectionId)) {
           links.push({
             moduleId: request.moduleId,
+            sourceTopic: slug,
             kbSlug: matched.slug,
             sectionId,
             matchType: 'partial',
@@ -211,6 +216,7 @@ export async function autofill(
           });
         links.push({
           moduleId: request.moduleId,
+          sourceTopic: slug,
           kbSlug: matched.slug,
           sectionId,
           matchType: 'partial',
@@ -229,6 +235,7 @@ export async function autofill(
         proposal.topics.push({ slug, content: await matcher.generate(slug) });
         links.push({
           moduleId: request.moduleId,
+          sourceTopic: slug,
           kbSlug: slug,
           sectionId: 'overview',
           matchType: 'new',

@@ -14,7 +14,22 @@ import {
   type QualityGateResult,
 } from '@jdcv/contracts';
 import type { Job, JobQueue } from '@jdcv/queue';
+import {
+  autofill,
+  normalizeTopic,
+  type ExclusiveLock,
+  type Matcher,
+} from '@jdcv/kb-autofill';
 import { createCvProposal, PrivateCvError } from './cv-proposal.js';
+import {
+  DryRunKbContentClient,
+  type KbContentClient,
+} from './kb-content-client.js';
+
+export {
+  DryRunKbContentClient,
+  type KbContentClient,
+} from './kb-content-client.js';
 
 export type Role = 'Generator' | 'Interviewer' | 'Examiner';
 export interface Thread {
@@ -62,6 +77,9 @@ export interface WorkerOptions {
   prompts: PromptBuilder;
   load: LoadReader;
   qualityGate?: { run(module: ModuleV2, job: Job): Promise<QualityGateResult> };
+  kbClient?: KbContentClient;
+  kbMatcher?: Matcher;
+  kbLock?: ExclusiveLock;
   moduleOnlyDryRun?: boolean;
   privateCvDirectory?: string;
   ownerId: string;
@@ -115,12 +133,18 @@ export function passesRubric(module: ModuleV2, rubric: Rubric): boolean {
 export class MacWorker {
   private readonly now: () => number;
   private readonly pause: (ms: number) => Promise<void>;
+  private readonly kbClient: KbContentClient;
 
   constructor(private readonly options: WorkerOptions) {
     if (!options.ownerId) throw new Error('Owner ID is required');
     this.now = options.now ?? Date.now;
     this.pause =
       options.pause ?? ((ms) => new Promise((done) => setTimeout(done, ms)));
+    this.kbClient = options.kbClient ?? new DryRunKbContentClient();
+    if (!(this.kbClient instanceof DryRunKbContentClient) && !options.kbLock)
+      throw new Error(
+        'An injected content client requires an exclusive KB lock',
+      );
   }
 
   private async admission(
@@ -348,16 +372,103 @@ export class MacWorker {
         covers(interview.defended, embellishments) &&
         passesRubric(module, rubric)
       ) {
+        let gatedModule = module;
         if (this.options.qualityGate) {
           const result = await this.options.qualityGate.run(module, job);
-          await writeFile(
-            paths.module,
-            JSON.stringify({ ...module, qualityGate: result }),
-            { mode: 0o600 },
-          );
+          gatedModule = moduleV2Schema.parse({
+            ...module,
+            qualityGate: result,
+          });
+          await writeFile(paths.module, JSON.stringify(gatedModule), {
+            mode: 0o600,
+          });
           if (!result.passed || result.failures.length)
             throw new RubricFailure();
         }
+        const topicsByEntry = new Map<string, string[]>();
+        const matcher = this.options.kbMatcher ?? {
+          extract: async (requirement: string) => [requirement],
+          judge: async () => ({ match: 'none' as const }),
+          generate: async (topic: string) =>
+            `The ${topic} topic explains a general concept. For example, a fictional page can demonstrate it.`,
+        };
+        let entryIndex = 0;
+        const trackedMatcher: Matcher = {
+          judge: (topic, candidates) => matcher.judge(topic, candidates),
+          generate: (topic, existing) => matcher.generate(topic, existing),
+          extract: async (requirement) => {
+            const topics = await matcher.extract(requirement);
+            topicsByEntry.set(
+              module.entries[entryIndex++]!.id,
+              topics.map(normalizeTopic),
+            );
+            return topics;
+          },
+        };
+        let enriched: ModuleV2 | null = null;
+        try {
+          const planStart =
+            this.kbClient instanceof DryRunKbContentClient
+              ? this.kbClient.plan.length
+              : 0;
+          const result = await autofill(
+            {
+              jobId: job.id,
+              moduleId: job.id,
+              requirements: module.entries.map(
+                (entry) =>
+                  module.requirements.find(
+                    (item) => item.id === entry.jdRequirement,
+                  )!.title.en,
+              ),
+              companyNames: [],
+              jdSentences: [],
+              privateNames: [],
+            },
+            this.kbClient,
+            trackedMatcher,
+            this.options.kbLock ?? { run: (operation) => operation() },
+          );
+          enriched = moduleV2Schema.parse({
+            ...gatedModule,
+            entries: module.entries.map((entry) => {
+              const sources = topicsByEntry.get(entry.id) ?? [];
+              const refs = result.links
+                .filter((link) => sources.includes(link.sourceTopic ?? ''))
+                .map((link) => ({
+                  slug: link.kbSlug,
+                  sectionId: link.sectionId,
+                  state: link.state,
+                }));
+              return {
+                ...entry,
+                ...(refs.length
+                  ? { kbRefs: [...(entry.kbRefs ?? []), ...refs] }
+                  : {}),
+              };
+            }),
+          });
+          if (this.kbClient instanceof DryRunKbContentClient) {
+            await writeFile(
+              join(workspace, 'kb-autofill-plan.json'),
+              JSON.stringify({
+                proposals: this.kbClient.plan.slice(planStart),
+                queued: result.queued,
+              }),
+              { mode: 0o600 },
+            );
+          }
+        } catch {
+          await writeFile(
+            join(workspace, 'kb-autofill-result.json'),
+            JSON.stringify({ reason: 'KB_AUTOFILL_FAILED' }),
+            { mode: 0o600 },
+          );
+        }
+        if (enriched)
+          await writeFile(paths.module, JSON.stringify(enriched), {
+            mode: 0o600,
+          });
         return this.options.moduleOnlyDryRun
           ? paths.module
           : join(workspace, 'cv-proposal.json');

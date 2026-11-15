@@ -17,6 +17,9 @@ directory, JDCV_JOB_DIR to an absolute private workspace directory, and
 JDCV_PRIVATE_CV_DIR to a private DOCX directory (default ~/ai-tools/jdcv-private/).
 JDCV_T3_REPO to a private local Git repository for live T3 threads.
 --dry-run uses a fake module and fake rubric; it never reads a CV or calls a model.
+KB autofill runs after module gates. Its content client is dry-run by default:
+it records a private plan and never writes content or opens a live PR.
+Only an explicitly injected client can attempt live content changes.
 Live CLI runs remain disabled until a private qualityGate adapter supplies
 independent review and a protected owner-decision store. The owner must decide
 each proposed CV line; pending lines block both Word and PDF export.

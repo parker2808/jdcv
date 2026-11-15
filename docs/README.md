@@ -1,5 +1,7 @@
 # Documentation
 
+The [KB autofill worker integration](specs/kb-autofill.md#worker-integration-gap-3) explains why the default client only plans content changes and how pending references remain pending. For example, `example-topic` can be proposed without opening a real content pull request.
+
 The [worker-to-content mapping](specs/module-content-mapping.md) describes how reviewed metadata converts a fictional worker result without publishing it. For example, a pending knowledge-base reference stays pending.
 
 Start with the [project context](../PROJECT_CONTEXT.md) for the current product scope, then read [lessons](LESSONS.md) before changing code. The [system specifications](specs/README.md) explain how the planned features fit together and give a reading order. For example, the export spec defines how a fictional CV becomes both a Word document and a PDF, with checks for readable Vietnamese text.
