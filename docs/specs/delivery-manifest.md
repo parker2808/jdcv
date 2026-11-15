@@ -24,4 +24,4 @@ The JSON Schema checks structure. The writer and reader also check file confinem
 
 ## Separate follow-ups
 
-The consumer in `<private-bot-repo>` must adapt its existing review and send flow to this versioned format and verify the manifest independently. Its approval interface, knowledge-base autofill (gap 3), content mapping (gap 4), production lifecycle adapters (gap 5), and any production PDF send need separate review and authorization.
+The consumer in `<private-bot-repo>` must adapt its existing review and send flow to this versioned format and verify the manifest independently. Its approval interface, the live knowledge-base client after the dry-run worker adapter in [PR #14](https://github.com/parker2808/jdcv/pull/14), content mapping (gap 4), production lifecycle adapters (gap 5), and any production PDF send need separate review and authorization.
