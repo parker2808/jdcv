@@ -6,6 +6,8 @@ JDCV Prep helps turn a job description into a tailored CV and interview study pa
 
 The repository is pre-alpha and contains a workspace starter, a local file job queue, shared module contracts, an injectable module lifecycle, a standalone CV renderer with a fictional sample template, pure prompt templates, quality gates, and a Mac worker with a fake-model dry run. Phase 1 is owner-only: the planned web view will show results and link to a Telegram conversation. No production service, personal CV, account integration, or deployment exists in this repository yet.
 
+The [isolated Phase 1 dry run](docs/e2e-dryrun-gap-report.md) completed one fictional bot-to-worker queue job, but its output could not be used for approved CV export, bot delivery, or the private content schema. A separate adapted fixture rendered in the local web app; this is not a successful end-to-end CV run. The report lists five unresolved integration gaps and no production effects.
+
 ## Planned phases
 
 Phase 1 adds the owner workflow and validation. Phase 2 adds an invitation-only web experience, account linking, and terms and privacy documents. Phase 3 may open both web and Telegram access to the public after privacy and security review. For example, the owner should be able to review proposed CV edits before any document is exported.
@@ -19,6 +21,8 @@ The starter uses Node.js 22, pnpm 9, TypeScript, Vitest, ESLint, and Prettier. T
 The production data service and its configuration are not available yet. `JobQueue` defines the storage contract; the database adapter and connected export flow remain later tasks. The Mac worker has not been launched as a service, and a live private runner still needs an operational review. The prompt package expects separate private JD, CV, facts, proposals, transcript, and readability files; the worker currently accepts one input reference and uses an injected prompt builder, so connecting the two requires a separate output and gate migration. The worker must still verify project facts and require per-line CV approval before export. The file queue assumes atomic rename on one local volume and a single Mac host; confirm cross-volume behavior before changing its storage location. The version 2 specification leaves archive dates and job-description IDs for the later storage record, not the module document. A knowledge-base (KB) reference cannot become live until its external target is verified. A trusted caller must obtain approvals from protected storage before rendering. The separate HTML/Chromium fallback, authenticated downloads with 30-day expiry, deployment font provisioning, and free-tier Gotenberg memory measurement remain open; the renderer fails visibly without a verified fallback. Licensing and exact attribution for any future reused code must be checked before copying.
 
 ## Changelog
+
+- 2026-11-16: Recorded one isolated, owner-only Phase 1 dry run, its five unresolved integration gaps, and the boundary between a passing fictional fixture and a real CV delivery. No live change or real delivery was made.
 
 - 2026-11-15: Added owner-only module archive, restore, purge, inactivity warning, and a safe CLI with injectable adapters and fictional tests. Production storage and notification adapters, the bot integration, the private data change, and the web button remain separate tasks; Git removal does not erase history.
 

@@ -4,6 +4,8 @@ JDCV Prep will turn a job description into a tailored curriculum vitae (CV) and 
 
 The project is **pre-alpha**. Phase 1 is owner-only: the web view will show results and offer a link to continue the conversation in Telegram. It is not a public CV service yet.
 
+The [one-time Phase 1 dry-run report](docs/e2e-dryrun-gap-report.md) records which isolated steps passed and which missing integrations still block a real application. For example, the fake worker completes a module job but does not create an approved tailored CV or delivery files. Do not treat a successful fake job as permission to use the flow with a real application.
+
 ## Help / usage
 
 Install Node.js 22 (see `.nvmrc`) and pnpm 9, then run these commands from the repository root:
