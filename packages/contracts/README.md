@@ -6,6 +6,8 @@
 
 Import `moduleV1Schema`, `moduleV2Schema`, `moduleIndexSchema`, `convertModuleV1ToV2`, and `checkModuleLanguageParity` from `@jdcv/contracts`. The converter takes an unknown value, rejects invalid version 1 data with a field path, and returns a version 2 value. Calling it with a valid version 2 module returns the same data. It performs no file or network work.
 
+Import `toContentModule` when a reviewed owner-only worker result needs the content document shape. Pass a `ModuleV2` and `ContentModuleMeta` containing reviewed bilingual labels, date, alias, tags, and lifecycle status. For example, `toContentModule(workerModule, reviewedMeta)` copies a pending knowledge-base reference without making it live, converts a CV-review reference to its ID, and rejects an entry with no real key point. It does not create the index or publish content. See the [field-by-field mapping](../../docs/specs/module-content-mapping.md).
+
 ```ts
 import {
   convertModuleV1ToV2,

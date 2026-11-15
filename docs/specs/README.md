@@ -1,5 +1,7 @@
 # System specifications
 
+The [worker-to-content mapping](module-content-mapping.md) explains why reviewed bilingual metadata and real key points are required before a fictional worker result can be indexed. It does not publish a module.
+
 These specifications describe how a job description (JD) becomes a tailored curriculum vitae (CV), an interview study module, and downloadable files. They define behavior and checks for later implementation; they do not themselves enable a service. For example, a sample JD for a fictional frontend role can produce a study module without putting the applicant's CV in Git.
 
 Read [module schema v2](module-schema-v2.md) first for the shared data contract. Then read [job queue and Mac worker](job-queue-and-mac-worker.md) for execution, [CV embellishment](cv-embellishment.md) for claim safety, [CV export](cv-export.md) for file output, and [KB autofill](kb-autofill.md) for reusable interview knowledge. [JD module UX](jd-module-ux.md) and [module deletion and archiving](module-delete-and-archive.md) cover presentation and lifecycle. Finish with [multi-user and privacy](multi-user-and-privacy.md) and [providers and terms](providers-and-terms.md) before opening the system to outside users.
