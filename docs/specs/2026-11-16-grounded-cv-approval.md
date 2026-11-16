@@ -6,7 +6,7 @@ The Mac worker must read the owner's general curriculum vitae (CV) before it can
 
 ## Boundary
 
-Only a DOCX general CV in the configured private directory may be read. Missing, ambiguous, linked, or repository-contained sources fail closed. A model proposes structured facts and edits through an injected relay; each fact must point to an exact source paragraph, and every original bullet must match that paragraph. A model's citation is not evidence if its quoted text is absent. A PDF-only source is not supported in this increment.
+By default, only a DOCX general CV in the configured private directory is read. The separate [published portfolio source](2026-11-16-portfolio-cv-source.md) may be selected explicitly; it produces the same numbered evidence from public fields and never falls back to a DOCX on failure. Missing, ambiguous, linked, or repository-contained DOCX sources fail closed. A model proposes structured facts and edits through an injected relay; each fact must point to an exact source paragraph, and every original bullet must match that paragraph. A model's citation is not evidence if its quoted text is absent. A PDF-only source is not supported in this increment.
 
 Proposals are versioned private objects, never public module entries. Every line starts pending. An owner decision changes only the named line. Approval of an unsupported detail requires a passing interview defence; rejection restores the original line. No export is requested while any decision is pending. A separate private delivery adapter and approval interface are later work.
 

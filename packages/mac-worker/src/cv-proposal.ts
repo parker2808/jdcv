@@ -21,6 +21,10 @@ import { runGates, type CvFacts, type OwnerRules } from '@jdcv/gates';
 import type { ModuleV2 } from '@jdcv/contracts';
 import type { Examination, ReadabilityResult } from '@jdcv/prompts';
 import { extractPdfText } from '@jdcv/cv-render';
+import { PrivateCvError } from './cv-source-error.js';
+import { loadPortfolioCv } from './portfolio-cv-source.js';
+
+export { PrivateCvError } from './cv-source-error.js';
 
 const factSchema = z
   .object({
@@ -75,18 +79,6 @@ export const cvProposalSchema = z
 
 export type CvProposal = z.infer<typeof cvProposalSchema>;
 export type OwnerDecision = { id: string; decision: 'approved' | 'rejected' };
-
-export class PrivateCvError extends Error {
-  constructor(
-    readonly code:
-      | 'CV_SOURCE_MISSING'
-      | 'CV_SOURCE_AMBIGUOUS'
-      | 'CV_SOURCE_UNSAFE'
-      | 'CV_SOURCE_UNSUPPORTED',
-  ) {
-    super(code);
-  }
-}
 
 function inside(path: string, parent: string): boolean {
   const remainder = relative(parent, path);
@@ -392,6 +384,10 @@ export async function exportApprovedCv(
 
 export async function createCvProposal(options: {
   directory?: string;
+  source?: 'docx' | 'portfolio';
+  portfolioApiUrl?: string;
+  portfolioLocale?: 'en' | 'vi';
+  portfolioFetch?: typeof fetch;
   repoRoot: string;
   jdPath: string;
   workspace: string;
@@ -403,10 +399,21 @@ export async function createCvProposal(options: {
   ) => Promise<void>;
   signal: AbortSignal;
 }): Promise<CvProposal> {
-  const { paragraphs } = await loadPrivateCv(
-    options.directory,
-    options.repoRoot,
-  );
+  const selected = options.source ?? 'docx';
+  if (selected !== 'docx' && selected !== 'portfolio')
+    throw new PrivateCvError('CV_SOURCE_CONFIG');
+  const { paragraphs, pointers } =
+    selected === 'portfolio'
+      ? await loadPortfolioCv({
+          baseUrl: options.portfolioApiUrl,
+          locale: options.portfolioLocale,
+          fetch: options.portfolioFetch,
+          signal: options.signal,
+        })
+      : {
+          ...(await loadPrivateCv(options.directory, options.repoRoot)),
+          pointers: undefined,
+        };
   const jd = await readFile(options.jdPath, 'utf8');
   if (!jd.trim()) throw new Error('JD is empty');
   const factsFile = resolve(options.workspace, 'cv-source.json');
@@ -417,6 +424,7 @@ export async function createCvProposal(options: {
       paragraphs.map((text, index) => ({
         sourceRef: `cv:paragraph:${index + 1}`,
         text,
+        pointer: pointers?.[index] ?? `paragraphs[${index}]`,
       })),
     ),
     { mode: 0o600 },

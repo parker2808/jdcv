@@ -1,5 +1,7 @@
 # System specifications
 
+The [published portfolio CV source](2026-11-16-portfolio-cv-source.md) keeps the existing owner approval rules while reading public, validated career facts. For example, an Example Labs highlight can supply a cited paragraph but cannot approve an edit.
+
 The [KB autofill worker integration](kb-autofill.md#worker-integration-gap-3) defines the dry-run content client, private plan, and fail-closed module handoff. For example, a fictional pending topic stays pending after it reaches a module entry.
 
 The [worker-to-content mapping](module-content-mapping.md) explains why reviewed bilingual metadata and real key points are required before a fictional worker result can be indexed. It does not publish a module.

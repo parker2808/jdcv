@@ -15,6 +15,11 @@ const help = `Usage: pnpm --filter @jdcv/mac-worker start -- [--dry-run] [--once
 Set JDCV_OWNER_ID to the owner ID, JDCV_QUEUE_DIR to an absolute private queue
 directory, JDCV_JOB_DIR to an absolute private workspace directory, and
 JDCV_PRIVATE_CV_DIR to a private DOCX directory (default ~/ai-tools/jdcv-private/).
+JDCV_CV_SOURCE selects docx (default) or portfolio for exactly one source per job.
+For portfolio, set JDCV_PORTFOLIO_API_URL to the public HTTPS API base ending
+in / (for example https://example.invalid/api/) and optionally set
+JDCV_PORTFOLIO_LOCALE to en (default) or vi. The worker reads both languages;
+HTTP, schema, timeout and empty-data errors fail closed without DOCX fallback.
 JDCV_T3_REPO to a private local Git repository for live T3 threads.
 --dry-run uses a fake module and fake rubric; it never reads a CV or calls a model.
 KB autofill runs after module gates. Its content client is dry-run by default:
