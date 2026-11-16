@@ -82,20 +82,32 @@ export interface WorkerOptions {
   kbLock?: ExclusiveLock;
   moduleOnlyDryRun?: boolean;
   privateCvDirectory?: string;
+  cvSource?: 'docx' | 'portfolio';
+  portfolioApiUrl?: string;
+  portfolioLocale?: 'en' | 'vi';
+  portfolioFetch?: typeof fetch;
   ownerId: string;
   workspaceRoot?: string;
   repoRoot?: string;
   now?: () => number;
   pause?: (ms: number) => Promise<void>;
-  log?: (event: {
-    env: 't3-lil.parker';
-    jobId: string;
-    role: Role;
-    threadId: string;
-    provider: string;
-    model: string;
-    switch: boolean;
-  }) => void;
+  log?: (
+    event:
+      | {
+          env: 't3-lil.parker';
+          jobId: string;
+          role: Role;
+          threadId: string;
+          provider: string;
+          model: string;
+          switch: boolean;
+        }
+      | {
+          env: 't3-lil.parker';
+          jobId: string;
+          cvSource: 'docx' | 'portfolio';
+        },
+  ) => void;
 }
 
 const LEASE_MS = 60_000;
@@ -254,7 +266,23 @@ export class MacWorker {
       rubric: join(workspace, 'rubric.json'),
     };
     if (!this.options.moduleOnlyDryRun) {
+      const cvSource =
+        this.options.cvSource ?? process.env.JDCV_CV_SOURCE ?? 'docx';
+      if (cvSource !== 'docx' && cvSource !== 'portfolio')
+        throw new PrivateCvError('CV_SOURCE_CONFIG');
+      this.options.log?.({
+        env: 't3-lil.parker',
+        jobId: job.id,
+        cvSource,
+      });
       const proposal = await createCvProposal({
+        source: cvSource,
+        portfolioApiUrl:
+          this.options.portfolioApiUrl ?? process.env.JDCV_PORTFOLIO_API_URL,
+        portfolioLocale:
+          this.options.portfolioLocale ??
+          (process.env.JDCV_PORTFOLIO_LOCALE as 'en' | 'vi' | undefined),
+        portfolioFetch: this.options.portfolioFetch,
         directory:
           this.options.privateCvDirectory ?? process.env.JDCV_PRIVATE_CV_DIR,
         repoRoot: repo,

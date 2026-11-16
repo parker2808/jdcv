@@ -4,9 +4,10 @@ The `ats-classic` Word template is original to this repository. It names Noto Sa
 
 The renderer uses the free core of docxtemplater and its PizZip integration. Third-party packages retain their own licenses in their distributions; no package source was copied into this repository.
 
-The following public sources are candidates for future reuse, not current dependencies:
+The small public-response shapes used by `packages/mac-worker/src/portfolio-cv-source.ts` describe the public `PublicSite`, `PublicExperience`, `PublicEducation`, `PublicSkillsGrouped`, `PublicProjectListPage`, and `PublicProjectDetail` JSON endpoints of lil.p (https://github.com/parker2808/lil.p). Only field names and types needed as CV evidence are defined here; no source code or engine from the proprietary CMS package was copied, and there is no runtime package dependency.
 
-- lil.p: https://github.com/parker2808/lil.p
+The following public source is a candidate for future reuse, not a current dependency:
+
 - interview-senior-fe: https://github.com/parker2808/interview-senior-fe
 
 Check each source's license and attribution requirements before copying anything.

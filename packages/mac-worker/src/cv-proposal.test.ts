@@ -232,12 +232,16 @@ describe('owner-only CV proposal', () => {
       payload: { inputRef: jdPath },
     });
     let generatorCount = 0;
+    const sourceEvents: unknown[] = [];
     const worker = new MacWorker({
       queue,
       ownerId: 'owner',
       privateCvDirectory: directory,
       repoRoot: process.cwd(),
       workspaceRoot: join(root, 'jobs'),
+      log: (event) => {
+        if ('cvSource' in event) sourceEvents.push(event);
+      },
       load: { read: async () => 4 },
       prompts: {
         build: (role: Role, _revision, paths) =>
@@ -315,6 +319,9 @@ describe('owner-only CV proposal', () => {
     const result = await worker.runOnce();
     expect(result?.status).toBe('completed');
     expect(generatorCount).toBe(2);
+    expect(sourceEvents).toEqual([
+      { env: 't3-lil.parker', jobId: job.id, cvSource: 'docx' },
+    ]);
     expect(
       JSON.parse(await readFile(result!.outputRef!, 'utf8')),
     ).toMatchObject({
