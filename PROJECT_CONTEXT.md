@@ -4,7 +4,6 @@ JDCV Prep helps turn a job description into a tailored CV and interview study pa
 
 ## Current state
 
-
 The repository is pre-alpha and contains a workspace starter, a local file job queue, shared module contracts, an injectable module lifecycle, a standalone CV renderer with a fictional sample template, pure prompt templates, quality gates, and a Mac worker with a fake-model dry run. Phase 1 is owner-only: the planned web view will show results and link to a Telegram conversation. No production service, personal CV, account integration, or deployment exists in this repository yet.
 
 The [isolated Phase 1 dry run](docs/e2e-dryrun-gap-report.md) completed one fictional bot-to-worker queue job, but its output could not be used for approved CV export, bot delivery, or the private content schema. An explicit pure mapper now prepares a content document only when reviewed metadata and nonempty key points are supplied; it does not connect the worker to publication. A separate adapted fixture rendered in the local web app; this is not a successful end-to-end CV run. The report lists five integration gaps and no production effects.
