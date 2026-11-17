@@ -24,6 +24,8 @@ The production data service and its configuration are not available yet. `JobQue
 
 ## Changelog
 
+- 2026-11-18: Document Parker’s task-scoped full decision authority in AGENTS.md; all existing gates remain mandatory. No runtime change.
+
 - 2026-11-16: Renamed the fictional version 1 and version 2 contract fixtures to `legacy-pack-v1.json` and `legacy-pack-v2.json`. Updated test references and schema examples to use neutral module names and paths without changing validators or test assertions; no private content was read.
 - 2026-11-16: Wired owner-only KB autofill into the gated worker module with an in-memory dry-run content client by default, private plan, fail-closed reason, and fictional worker-to-content reference regression. Live content client and content PRs in `<private-content-repo>`, its regression, bot integration, delivery manifest consumer (gap 2), and production lifecycle adapters (gap 5) remain open; no live content was written.
 - 2026-11-16: Added a private version 1 delivery manifest contract, an opt-in writer after owner decisions and approved export gates, and a read-side verifier for protected per-job DOCX/PDF handoff. Fictional tests cover incomplete decisions, changed bytes, missing files, and escaping or linked paths. No live worker or consumer is wired to the writer. The consumer in `<private-bot-repo>`, bot approval interface, the separate live KB client following [PR #14](https://github.com/parker2808/jdcv/pull/14), the content publication and private regression following gap 4, production lifecycle adapters (gap 5), and production PDF sending remain separate reviewed work; PDF sending requires fresh owner authorization. No Dev notice was sent at coordinator direction.
