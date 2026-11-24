@@ -24,6 +24,7 @@ The production data service and its configuration are not available yet. `JobQue
 
 ## Changelog
 
+- 25 Nov 2026: Added `CLAUDE.md` and `.claude/settings.json` for Claude Code (permissions only; AGENTS.md is unchanged and stays canonical). It records that Cursor via T3 writes code while Claude plans and reviews, with the 24-25 Nov 2026 setup batch as a one-time exception, and that gates run only in a fresh `origin/main` worktree. Open item: AGENTS.md still states an 08:00–23:00 ICT merge and deploy window and quiet hours, which differ from the 24/7 rule in the shared common rules (Parker kept AGENTS.md as is on 24 Nov 2026); Parker or the coordinator should reconcile it in a separate change. No runtime change.
 - 2026-11-18: Document Parker’s task-scoped full decision authority in AGENTS.md; all existing gates remain mandatory. No runtime change.
 
 - 2026-11-16: Renamed the fictional version 1 and version 2 contract fixtures to `legacy-pack-v1.json` and `legacy-pack-v2.json`. Updated test references and schema examples to use neutral module names and paths without changing validators or test assertions; no private content was read.
